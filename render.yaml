@@ -1,11 +1,13 @@
 services:
   - type: web
     name: futsal-app
-    env: native
+    env: docker
     region: frankfurt
     plan: free
-    buildCommand: ./gradlew build
-    startCommand: java -jar build/libs/*.jar
     envVars:
-      - key: JAVA_VERSION
-        value: 21
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://<teu-host-supabase>:5432/postgres
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: Amanu13081981__
