@@ -15,12 +15,12 @@
             overflow-x: hidden;
         }
         #app-scaler {
-            width: 100%; max-width: 1280px; min-height: 100vh;
+            width: 100%; max-width: 1320px; min-height: 100vh;
             display: flex; flex-direction: column; position: relative;
             padding: 10px;
         }
         @media (min-width: 768px) {
-            #app-scaler { height: 720px; min-height: unset; border: 1px solid #333; border-radius: 10px; background: #181818; overflow: hidden; }
+            #app-scaler { height: 760px; min-height: unset; border: 1px solid #333; border-radius: 10px; background: #181818; overflow: hidden; }
         }
 
         /* Ecrãs de Navegação */
@@ -29,171 +29,134 @@
 
         /* Seleção de Escalões */
         .escaloes-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px; padding: 20px; overflow-y: auto; flex: 1;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px; padding: 25px; overflow-y: auto; flex: 1;
         }
         .card-escalao {
-            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-            padding: 25px; text-align: center; cursor: pointer; transition: 0.2s;
+            background: #1a1a1a; border: 1px solid #333; border-radius: 10px;
+            padding: 30px; text-align: center; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         .card-escalao:hover { border-color: #00ffcc; background: #222; transform: translateY(-3px); }
-        .card-escalao h3 { color: #00ffcc; margin: 0 0 5px 0; }
+        .card-escalao h3 { color: #00ffcc; margin: 0 0 8px 0; font-size: 1.2rem; }
         .card-escalao p { color: #888; font-size: 0.85rem; margin: 0; }
 
         /* Top Nav & Layout Principal */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            background: #1a1a1a; border-bottom: 1px solid #333; padding: 10px 15px;
-            border-radius: 6px 6px 0 0;
+            background: #1a1a1a; border-bottom: 1px solid #333; padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
         }
         .main-layout {
-            display: flex; width: 100%; height: calc(100% - 55px);
-            gap: 10px; padding: 10px; box-sizing: border-box; overflow: hidden;
+            display: flex; width: 100%; height: calc(100% - 60px);
+            gap: 15px; padding: 15px; box-sizing: border-box; overflow: hidden;
             flex-direction: column;
-        }
-        @media (min-width: 992px) {
-            .main-layout { flex-direction: row; }
         }
         .panel {
             background: #1a1a1a; border: 1px solid #333;
-            border-radius: 8px; display: flex; flex-direction: column; padding: 12px;
+            border-radius: 8px; display: flex; flex-direction: column; padding: 15px; flex: 1; overflow: hidden;
         }
-        .left-panel { flex: 1.2; overflow-y: auto; display: none; }
-        .left-panel.active { display: flex; }
-        .right-panel { flex: 2.8; overflow: hidden; }
         
         .panel-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 6px;
+            margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px;
         }
-        .panel-header h3 { margin: 0; font-size: 1rem; color: #00ffcc; }
+        .panel-header h3 { margin: 0; font-size: 1.1rem; color: #00ffcc; }
         
-        form div { margin-bottom: 8px; }
-        label { display: block; font-size: 0.78rem; color: #aaa; margin-bottom: 3px; }
+        /* Modal Overlay para CRUD */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+            padding: 15px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 10px;
+            width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); position: relative;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px;
+        }
+        .modal-header h3 { margin: 0; color: #00ffcc; font-size: 1.1rem; }
+
+        form div { margin-bottom: 10px; }
+        label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px; }
         input, select {
-            width: 100%; padding: 8px; background-color: #252525;
-            border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.85rem; box-sizing: border-box;
+            width: 100%; padding: 9px; background-color: #252525;
+            border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.9rem; box-sizing: border-box;
         }
         input:focus, select:focus { border-color: #00ffcc; outline: none; }
         
         .btn-action {
             width: 100%; background-color: #00ffcc; color: #000;
-            font-weight: bold; padding: 9px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; margin-top: 5px;
+            font-weight: bold; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; margin-top: 10px;
         }
         .btn-action:hover { background-color: #00cca3; }
         .btn-secondary {
-            background-color: #444; color: #fff; border: none;
-            padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+            background-color: #333; color: #fff; border: 1px solid #444;
+            padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s;
         }
-        .btn-secondary:hover { background-color: #555; }
+        .btn-secondary:hover { background-color: #444; border-color: #00ffcc; }
         .btn-cancel {
-            width: 100%; background-color: #333; color: #fff;
-            font-weight: bold; padding: 6px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-top: 4px; display: none;
+            width: 100%; background-color: #2a2a2a; color: #aaa;
+            font-weight: bold; padding: 8px; border: 1px solid #444; border-radius: 5px; cursor: pointer; font-size: 0.85rem; margin-top: 6px;
         }
+        .btn-cancel:hover { background-color: #333; color: #fff; }
 
         .filters-bar {
-            display: flex; gap: 8px; margin-bottom: 10px; background: #141414;
-            padding: 8px; border-radius: 6px; border: 1px solid #333; align-items: center; flex-wrap: wrap;
+            display: flex; gap: 10px; margin-bottom: 12px; background: #141414;
+            padding: 10px; border-radius: 6px; border: 1px solid #333; align-items: center; flex-wrap: wrap;
         }
-        .filters-bar div { flex: 1; min-width: 120px; }
+        .filters-bar div { flex: 1; min-width: 140px; }
 
         .table-container { flex: 1; overflow-y: auto; border: 1px solid #333; border-radius: 6px; background: #111; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { border-bottom: 1px solid #222; padding: 10px; text-align: left; font-size: 0.85rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th, td { border-bottom: 1px solid #222; padding: 12px; text-align: left; font-size: 0.88rem; }
         th { background-color: #1a1a1a; color: #00ffcc; position: sticky; top: 0; z-index: 1; }
-        img.avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid #00ffcc; }
+        img.avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid #00ffcc; }
         
         .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background-color: #ffc107; color: #000; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
-        .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .btn-edit { background-color: #ffc107; color: #000; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold; }
+        .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="app-scaler">
 
-        <!-- 1. ECRÃ DE SELEÇÃO DE ESCALÃO (Página Inicial) -->
+        <!-- 1. ECRÃ DE SELEÇÃO DE ESCALÃO -->
         <div id="escalaoScreen" class="screen active">
             <div class="top-nav-bar">
-                <h3 style="margin: 0; color: #00ffcc; font-size: 1rem;">Futsal PRO - Selecione o Escalão</h3>
+                <h3 style="margin: 0; color: #00ffcc; font-size: 1.1rem;">Futsal PRO - Selecione o Escalão</h3>
             </div>
             <div class="escaloes-grid" id="gridEscaloes">
-                <!-- Preenchido via JS dinamicamente -->
+                <!-- Preenchido via JS -->
             </div>
         </div>
 
         <!-- 2. ECRÃ DE GESTÃO DE ATLETAS -->
         <div id="dashboardScreen" class="screen">
             <div class="top-nav-bar">
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn-secondary" onclick="irParaEscaloes()">⬅ Voltar Escalões</button>
-                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: #00ffcc; font-size: 1rem;">Escalão</h3>
+                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: #00ffcc; font-size: 1.1rem;">Escalão</h3>
                 </div>
-                <button class="btn-secondary" style="background-color: #00ffcc; color: #000;" onclick="toggleFormulario()">+ Inserir Atleta</button>
+                <button class="btn-secondary" style="background-color: #00ffcc; color: #000; border-color: #00ffcc;" onclick="abrirModalCriacao()">+ Inserir Atleta</button>
             </div>
             
             <div class="main-layout">
-                <!-- Painel Esquerdo: Formulário Oculto / Visível -->
-                <div class="panel left-panel" id="formPanel">
+                <div class="panel">
                     <div class="panel-header">
-                        <h3 id="formTitle">Inserir Novo Atleta</h3>
-                    </div>
-                    <form id="atletaForm">
-                        <input type="hidden" id="atletaId">
-                        <div><label>Nome:</label><input type="text" id="nome" required></div>
-                        <div>
-                            <label>Posição:</label>
-                            <select id="posicao">
-                                <option value="Guarda-Redes">Guarda-Redes</option>
-                                <option value="Fixo">Fixo</option>
-                                <option value="Ala">Ala</option>
-                                <option value="Pívot">Pívot</option>
-                            </select>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label>Nº Atleta:</label><input type="number" id="numeroAtleta"></div>
-                            <div style="flex: 1;"><label>Idade:</label><input type="number" id="idade"></div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label>Altura (m):</label><input type="number" step="0.01" id="altura"></div>
-                            <div style="flex: 1;"><label>Peso (kg):</label><input type="number" step="0.1" id="peso"></div>
-                        </div>
-                        <div><label>Telemóvel:</label><input type="text" id="telemovel"></div>
-                        <div><label>Email:</label><input type="email" id="email"></div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;">
-                                <label>Status:</label>
-                                <select id="status">
-                                    <option value="Disponivel">Disponível</option>
-                                    <option value="Lesionado">Lesionado</option>
-                                    <option value="Ausente">Ausente</option>
-                                </select>
-                            </div>
-                            <div style="flex: 1;"><label>Cond. Física:</label><input type="text" id="condicaoFisica" placeholder="Ex: 100%"></div>
-                        </div>
-                        <div><label>Encarregado de Educação (EE):</label><input type="text" id="encarregadoEducacao"></div>
-                        <div><label>Telemóvel EE:</label><input type="text" id="telemovelEE"></div>
-                        <div>
-                            <label>Foto:</label>
-                            <input type="file" id="fotoInput" accept="image/*" style="padding: 4px; background: #252525; border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.8rem;">
-                        </div>
-                        <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
-                        <button type="button" id="btnCancel" class="btn-cancel" onclick="limparFormulario()">Fechar / Cancelar</button>
-                    </form>
-                </div>
-
-                <!-- Painel Direito: Listagem com Filtros -->
-                <div class="panel right-panel" style="flex: 1;">
-                    <div class="panel-header">
-                        <h3>Plantel do Escalão</h3>
+                        <h3>Plantel e Gestão de Atletas</h3>
                     </div>
 
                     <div class="filters-bar">
                         <div>
                             <label>Filtrar por Posição:</label>
                             <select id="filtroPosicao" onchange="filtrarAtletas()">
-                                <option value="">Todas</option>
+                                <option value="">Todas as Posições</option>
                                 <option value="Guarda-Redes">Guarda-Redes</option>
                                 <option value="Fixo">Fixo</option>
                                 <option value="Ala">Ala</option>
@@ -201,8 +164,8 @@
                             </select>
                         </div>
                         <div>
-                            <label>Procurar Nome:</label>
-                            <input type="text" id="filtroNome" placeholder="Nome do atleta..." oninput="filtrarAtletas()">
+                            <label>Procurar Atleta:</label>
+                            <input type="text" id="filtroNome" placeholder="Nome ou número..." oninput="filtrarAtletas()">
                         </div>
                     </div>
 
@@ -221,7 +184,7 @@
                                 </tr>
                             </thead>
                             <tbody id="tabelaAtletas">
-                                <!-- Preenchido dinamicamente via JS -->
+                                <!-- Preenchido via JS -->
                             </tbody>
                         </table>
                     </div>
@@ -231,17 +194,68 @@
 
     </div>
 
+    <!-- MODAL DO CRUD (Sobrepõe a tabela sem reduzir o layout) -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="formTitle">Inserir Novo Atleta</h3>
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="fecharModal()">✕</button>
+            </div>
+            <form id="atletaForm">
+                <input type="hidden" id="atletaId">
+                <div><label>Nome Completo:</label><input type="text" id="nome" required placeholder="Ex: Nome do Atleta"></div>
+                <div>
+                    <label>Posição:</label>
+                    <select id="posicao">
+                        <option value="Guarda-Redes">Guarda-Redes</option>
+                        <option value="Fixo">Fixo</option>
+                        <option value="Ala">Ala</option>
+                        <option value="Pívot">Pívot</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;"><label>Nº Camisola:</label><input type="number" id="numeroAtleta" placeholder="Ex: 14"></div>
+                    <div style="flex: 1;"><label>Idade:</label><input type="number" id="idade" placeholder="Ex: 16"></div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;"><label>Altura (m):</label><input type="number" step="0.01" id="altura" placeholder="Ex: 1.75"></div>
+                    <div style="flex: 1;"><label>Peso (kg):</label><input type="number" step="0.1" id="peso" placeholder="Ex: 68.5"></div>
+                </div>
+                <div><label>Telemóvel:</label><input type="text" id="telemovel" placeholder="912345678"></div>
+                <div><label>Email:</label><input type="email" id="email" placeholder="atleta@email.com"></div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>Status:</label>
+                        <select id="status">
+                            <option value="Disponivel">Disponível</option>
+                            <option value="Lesionado">Lesionado</option>
+                            <option value="Ausente">Ausente</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;"><label>Condição Física:</label><input type="text" id="condicaoFisica" placeholder="Ex: 100%"></div>
+                </div>
+                <div><label>Encarregado de Educação (EE):</label><input type="text" id="encarregadoEducacao" placeholder="Nome do EE"></div>
+                <div><label>Telemóvel EE:</label><input type="text" id="telemovelEE" placeholder="987654321"></div>
+                <div>
+                    <label>Fotografia:</label>
+                    <input type="file" id="fotoInput" accept="image/*" style="padding: 5px; background: #252525; border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.85rem;">
+                </div>
+                <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
+                <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const API_URL = '/api/atletas';
         let atletasCache = [];
         let escalaoSelecionado = '';
 
         const escaloesLista = [
-            "Petizes", "Traquinas", "Benjamins", "Infantis", 
+            "Petrizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
 
-        // Inicializar a aplicação diretamente carregando os escalões na página principal
         window.addEventListener("DOMContentLoaded", () => {
             carregarEscaloesUI();
         });
@@ -277,6 +291,18 @@
             document.getElementById(screenId).classList.add('active');
         }
 
+        function abrirModalCriacao() {
+            document.getElementById('atletaForm').reset();
+            document.getElementById('atletaId').value = '';
+            document.getElementById('formTitle').innerText = 'Inserir Novo Atleta';
+            document.getElementById('btnSubmit').innerText = 'Guardar Atleta';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
         const getBase64 = (file) => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -284,12 +310,6 @@
             reader.onerror = error => reject(error);
         });
 
-        function toggleFormulario() {
-            const panel = document.getElementById('formPanel');
-            panel.classList.toggle('active');
-        }
-
-        // READ: Carregar atletas da API filtrando pelo escalão ativo
         async function carregarAtletas() {
             try {
                 const response = await fetch(API_URL);
@@ -307,20 +327,20 @@
             tbody.innerHTML = '';
 
             if (atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #777;">Nenhum atleta registado neste escalão.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #777; padding: 20px;">Nenhum atleta registado neste escalão.</td></tr>`;
                 return;
             }
 
             atletas.forEach(a => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : 'Sem foto'}</td>
-                    <td><span style="color: #ffcc00; font-weight: bold;">${a.numeroAtleta || ''}</span></td>
+                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:#555;">Sem foto</span>'}</td>
+                    <td><span style="color: #ffcc00; font-weight: bold;">${a.numeroAtleta || '-'}</span></td>
                     <td>${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
-                    <td>${a.idade || ''}</td>
-                    <td><span style="color: ${a.status === 'Disponivel' ? '#00ffcc' : '#ff5555'};">${a.status || ''}</span></td>
-                    <td>${a.telemovel || ''}</td>
+                    <td>${a.idade || '-'}</td>
+                    <td><span style="color: ${a.status === 'Disponivel' ? '#00ffcc' : '#ff5555'}; font-weight: bold;">${a.status || ''}</span></td>
+                    <td>${a.telemovel || '-'}</td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="prepararEdicao(${a.id})">Editar</button>
@@ -338,14 +358,14 @@
 
             const filtrados = atletasCache.filter(a => {
                 const matchPos = posFiltro === "" || a.posicao === posFiltro;
-                const matchNome = (a.nome || '').toLowerCase().includes(nomeFiltro);
+                const matchNome = (a.nome || '').toLowerCase().includes(nomeFiltro) || 
+                                  String(a.numeroAtleta || '').includes(nomeFiltro);
                 return matchPos && matchNome;
             });
 
             renderizarTabela(filtrados);
         }
 
-        // CREATE & UPDATE
         document.getElementById('atletaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -387,8 +407,7 @@
             });
 
             if (response.ok) {
-                limparFormulario();
-                toggleFormulario();
+                fecharModal();
                 carregarAtletas();
             } else {
                 alert('Erro ao guardar o atleta na base de dados.');
@@ -415,21 +434,7 @@
 
             document.getElementById('formTitle').innerText = 'Editar Atleta';
             document.getElementById('btnSubmit').innerText = 'Atualizar Atleta';
-            document.getElementById('btnCancel').style.display = 'block';
-
-            const panel = document.getElementById('formPanel');
-            if (!panel.classList.contains('active')) {
-                panel.classList.add('active');
-            }
-        }
-
-        function limparFormulario() {
-            document.getElementById('atletaForm').reset();
-            document.getElementById('atletaId').value = '';
-            document.getElementById('formTitle').innerText = 'Inserir Novo Atleta';
-            document.getElementById('btnSubmit').innerText = 'Guardar Atleta';
-            document.getElementById('btnCancel').style.display = 'none';
-            toggleFormulario();
+            document.getElementById('modalOverlay').classList.add('active');
         }
 
         async function eliminarAtleta(id) {
