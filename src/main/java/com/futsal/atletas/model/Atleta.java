@@ -12,7 +12,10 @@ public class Atleta {
 
     private String nome;
     private String posicao;
-    private String escalao;
+    
+    // Substituído ou adaptado para múltiplos escalões (ex: "Juniores, Seniores")
+    private String escaloes; 
+
     private Integer numeroAtleta;
     private Integer idade;
     private Double altura;
@@ -27,7 +30,6 @@ public class Atleta {
     @Column(columnDefinition = "TEXT")
     private String fotoBase64;
 
-    // Novos campos adicionados (Valores por escolha)
     private String avaliacao;
     private String nivelCansaco;
     private String descanso;
@@ -49,8 +51,8 @@ public class Atleta {
     public String getPosicao() { return posicao; }
     public void setPosicao(String posicao) { this.posicao = posicao; }
 
-    public String getEscalao() { return escalao; }
-    public void setEscalao(String escalao) { this.escalao = escalao; }
+    public String getEscaloes() { return escaloes; }
+    public void setEscaloes(String escaloes) { this.escaloes = escaloes; }
 
     public Integer getNumeroAtleta() { return numeroAtleta; }
     public void setNumeroAtleta(Integer numeroAtleta) { this.numeroAtleta = numeroAtleta; }

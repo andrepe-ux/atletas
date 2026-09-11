@@ -7,66 +7,76 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/atletas")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Permite pedidos do frontend sem bloqueios de CORS
 public class AtletaController {
 
     @Autowired
     private AtletaRepository atletaRepository;
 
+    // GET: Listar todos os atletas
     @GetMapping
     public List<Atleta> listarTodos() {
         return atletaRepository.findAll();
     }
 
+    // GET: Procurar atleta por ID
     @GetMapping("/{id}")
     public ResponseEntity<Atleta> buscarPorId(@PathVariable Long id) {
-        return atletaRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Atleta> atleta = atletaRepository.findById(id);
+        if (atleta.isPresent()) {
+            return ResponseEntity.ok(atleta.get());
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/posicao/{posicao}")
-    public List<Atleta> buscarPorPosicao(@PathVariable String posicao) {
-        return atletaRepository.findByPosicao(posicao);
-    }
-
-    @GetMapping("/status/{status}")
-    public List<Atleta> buscarPorStatus(@PathVariable String status) {
-        return atletaRepository.findByStatus(status);
-    }
-
+    // POST: Criar novo atleta
     @PostMapping
     public Atleta criarAtleta(@RequestBody Atleta atleta) {
         return atletaRepository.save(atleta);
     }
 
+    // PUT: Atualizar atleta existente
     @PutMapping("/{id}")
-    public ResponseEntity<Atleta> atualizarAtleta(@PathVariable Long id, @RequestBody Atleta atletaAtualizado) {
-        return atletaRepository.findById(id).map(atleta -> {
-            atleta.setNome(atletaAtualizado.getNome());
-            atleta.setPosicao(atletaAtualizado.getPosicao());
-            atleta.setEscalao(atletaAtualizado.getEscalao());
-            atleta.setNumeroAtleta(atletaAtualizado.getNumeroAtleta());
-            atleta.setIdade(atletaAtualizado.getIdade());
-            atleta.setAltura(atletaAtualizado.getAltura());
-            atleta.setPeso(atletaAtualizado.getPeso());
-            atleta.setTelemovel(atletaAtualizado.getTelemovel());
-            atleta.setEmail(atletaAtualizado.getEmail());
-            atleta.setStatus(atletaAtualizado.getStatus());
-            atleta.setCondicaoFisica(atletaAtualizado.getCondicaoFisica());
-            atleta.setEncarregadoEducacao(atletaAtualizado.getEncarregadoEducacao());
-            atleta.setTelemovelEE(atletaAtualizado.getTelemovelEE());
-            if (atletaAtualizado.getFotoBase64() != null) {
-                atleta.setFotoBase64(atletaAtualizado.getFotoBase64());
+    public ResponseEntity<Atleta> atualizarAtleta(@PathVariable Long id, @RequestBody Atleta atletaDetalhes) {
+        Optional<Atleta> atletaOptional = atletaRepository.findById(id);
+        
+        if (atletaOptional.isPresent()) {
+            Atleta atleta = atletaOptional.get();
+            atleta.setNome(atletaDetalhes.getNome());
+            atleta.setPosicao(atletaDetalhes.getPosicao());
+            atleta.setEscaloes(atletaDetalhes.getEscaloes()); // Atualiza os múltiplos escalões
+            atleta.setNumeroAtleta(atletaDetalhes.getNumeroAtleta());
+            atleta.setIdade(atletaDetalhes.getIdade());
+            atleta.setAltura(atletaDetalhes.getAltura());
+            atleta.setPeso(atletaDetalhes.getPeso());
+            atleta.setTelemovel(atletaDetalhes.getTelemovel());
+            atleta.setEmail(atletaDetalhes.getEmail());
+            atleta.setStatus(atletaDetalhes.getStatus());
+            atleta.setCondicaoFisica(atletaDetalhes.getCondicaoFisica());
+            atleta.setEncarregadoEducacao(atletaDetalhes.getEncarregadoEducacao());
+            atleta.setTelemovelEE(atletaDetalhes.getTelemovelEE());
+            atleta.setAvaliacao(atletaDetalhes.getAvaliacao());
+            atleta.setNivelCansaco(atletaDetalhes.getNivelCansaco());
+            atleta.setDescanso(atletaDetalhes.getDescanso());
+            atleta.setAlimentacao(atletaDetalhes.getAlimentacao());
+            atleta.setAproveitamentoEscolar(atletaDetalhes.getAproveitamentoEscolar());
+            atleta.setObservacoes(atletaDetalhes.getObservacoes());
+            
+            if (atletaDetalhes.getFotoBase64() != null) {
+                atleta.setFotoBase64(atletaDetalhes.getFotoBase64());
             }
-            Atleta actualizado = atletaRepository.save(atleta);
-            return ResponseEntity.ok(actualizado);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+
+            Atleta atualizado = atletaRepository.save(atleta);
+            return ResponseEntity.ok(atualizado);
+        }
+        return ResponseEntity.notFound().build();
     }
 
+    // DELETE: Eliminar atleta
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarAtleta(@PathVariable Long id) {
         if (atletaRepository.existsById(id)) {

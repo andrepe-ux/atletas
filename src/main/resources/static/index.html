@@ -63,7 +63,6 @@
         }
         .panel-header h3 { margin: 0; font-size: 1.15rem; color: #222; }
         
-        /* Modal Expandido Claro e Responsivo */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); z-index: 1000; justify-content: center; align-items: center;
@@ -125,49 +124,30 @@
         th { background-color: #f8f9fa; color: #007bff; position: sticky; top: 0; z-index: 10; font-weight: bold; border-bottom: 2px solid #dee2e6; }
         tr:hover { background-color: #f8f9fa; }
         
-        /* Destaque de Alerta na Linha se Condição < 50 ou Cansaço Elevado/Exausto */
-        tr.alerta-atleta {
-            background-color: #fff3f3 !important;
-        }
-        tr.alerta-atleta:hover {
-            background-color: #ffe6e6 !important;
-        }
+        tr.alerta-atleta { background-color: #fff3f3 !important; }
         .badge-alerta {
             background-color: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px;
-            font-size: 0.75rem; font-weight: bold; display: inline-block; animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+            font-size: 0.75rem; font-weight: bold; display: inline-block;
         }
 
-        /* Efeito de zoom na fotografia ao passar o rato */
         img.avatar {
             width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;
             transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
-            cursor: pointer;
-            transform-origin: center center;
+            cursor: pointer; transform-origin: center center;
         }
         img.avatar:hover {
-            transform: scale(2.8);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-            z-index: 100;
-            position: relative;
+            transform: scale(2.8); box-shadow: 0 8px 20px rgba(0,0,0,0.25); z-index: 100; position: relative;
         }
         
         .action-btns { display: flex; gap: 6px; }
         .btn-edit { background-color: #ffc107; color: #212529; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-edit:hover { background-color: #e0a800; }
         .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
 
     <div id="app-scaler">
 
-        <!-- 1. ECRÃ DE SELEÇÃO DE ESCALÃO -->
         <div id="escalaoScreen" class="screen active">
             <div class="top-nav-bar">
                 <h3 style="margin: 0; color: #007bff; font-size: 1.15rem;">Futsal PRO - Selecione o Escalão</h3>
@@ -175,7 +155,6 @@
             <div class="escaloes-grid" id="gridEscaloes"></div>
         </div>
 
-        <!-- 2. ECRÃ DE GESTÃO DE ATLETAS -->
         <div id="dashboardScreen" class="screen">
             <div class="top-nav-bar">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -216,13 +195,11 @@
                                     <th>Nº</th>
                                     <th>Nome</th>
                                     <th>Posição</th>
+                                    <th>Escalões</th>
                                     <th>Idade</th>
                                     <th>Cond. Física</th>
                                     <th>Avaliação</th>
                                     <th>Cansaço</th>
-                                    <th>Descanso</th>
-                                    <th>Alimentação</th>
-                                    <th>Escola</th>
                                     <th>Status</th>
                                     <th>Alerta</th>
                                     <th>Ações</th>
@@ -237,7 +214,7 @@
 
     </div>
 
-    <!-- MODAL DO CRUD EXPANDIDO -->
+    <!-- MODAL DO CRUD COM SELEÇÃO DE MÚLTIPLOS ESCALÕES -->
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -259,6 +236,33 @@
                             <option value="Fixo">Fixo</option>
                             <option value="Ala">Ala</option>
                             <option value="Pívot">Pívot</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Escalão Principal:</label>
+                        <select id="escalaoPrincipal" required>
+                            <option value="Petrizes">Petrizes</option>
+                            <option value="Traquinas">Traquinas</option>
+                            <option value="Benjamins">Benjamins</option>
+                            <option value="Infantis">Infantis</option>
+                            <option value="Iniciados">Iniciados</option>
+                            <option value="Juvenis">Juvenis</option>
+                            <option value="Juniores">Juniores</option>
+                            <option value="Seniores">Seniores</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Escalão Secundário (Opcional):</label>
+                        <select id="escalaoSecundario">
+                            <option value="">Nenhum</option>
+                            <option value="Petrizes">Petrizes</option>
+                            <option value="Traquinas">Traquinas</option>
+                            <option value="Benjamins">Benjamins</option>
+                            <option value="Infantis">Infantis</option>
+                            <option value="Iniciados">Iniciados</option>
+                            <option value="Juvenis">Juvenis</option>
+                            <option value="Juniores">Juniores</option>
+                            <option value="Seniores">Seniores</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -298,7 +302,6 @@
                         <input type="text" id="condicaoFisica" placeholder="Ex: 45 ou 80%">
                     </div>
 
-                    <!-- CAMPOS POR ESCOLHA -->
                     <div class="form-group">
                         <label>Avaliação:</label>
                         <select id="avaliacao">
@@ -354,7 +357,7 @@
 
                     <div class="form-group full-width">
                         <label>Observações:</label>
-                        <textarea id="observacoes" placeholder="Notas importantes sobre o rendimento, comportamento ou aspetos médicos..."></textarea>
+                        <textarea id="observacoes" placeholder="Notas importantes..."></textarea>
                     </div>
                 </div>
 
@@ -433,7 +436,14 @@
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Erro na resposta da API');
                 const todos = await response.json();
-                atletasCache = todos.filter(a => a.escalao === escalaoSelecionado);
+                
+                // Lógica principal: Verifica se o escalão selecionado está presente na string "escaloes" do atleta
+                atletasCache = todos.filter(a => {
+                    if (!a.escaloes) return false;
+                    const listaEscaloes = a.escaloes.split(',').map(e => e.trim());
+                    return listaEscaloes.includes(escalaoSelecionado);
+                });
+
                 renderizarTabela(atletasCache);
             } catch (error) {
                 console.error('Erro ao carregar atletas:', error);
@@ -445,7 +455,7 @@
             tbody.innerHTML = '';
 
             if (atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="14" style="text-align: center; color: #777; padding: 25px;">Nenhum atleta registado neste escalão.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: #777; padding: 25px;">Nenhum atleta registado neste escalão.</td></tr>`;
                 return;
             }
 
@@ -464,13 +474,11 @@
                     <td><span style="color: #007bff; font-weight: bold;">${a.numeroAtleta || '-'}</span></td>
                     <td>${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
+                    <td><span style="color: #495057; font-weight: bold; font-size: 0.8rem;">${a.escaloes || '-'}</span></td>
                     <td>${a.idade || '-'}</td>
                     <td><span style="font-weight: bold; color: ${condFisicaNum < 50 ? '#d9534f' : '#333'};">${a.condicaoFisica || '-'}</span></td>
                     <td>${a.avaliacao || '-'}</td>
                     <td><span style="color: ${cansaco === 'Elevado' || cansaco === 'Exausto' ? '#d9534f' : '#28a745'}; font-weight: bold;">${cansaco || '-'}</span></td>
-                    <td>${a.descanso || '-'}</td>
-                    <td>${a.alimentacao || '-'}</td>
-                    <td>${a.aproveitamentoEscolar || '-'}</td>
                     <td><span style="color: ${a.status === 'Disponivel' ? '#28a745' : '#d9534f'}; font-weight: bold;">${a.status || ''}</span></td>
                     <td>${precisaAvaliar ? `<span class="badge-alerta">⚠️ Avaliar Atleta</span>` : '<span style="color: #28a745; font-size: 0.8rem;">Normal</span>'}</td>
                     <td>
@@ -512,10 +520,19 @@
                 if (atletaExistente) fotoBase64 = atletaExistente.fotoBase64;
             }
 
+            const escPrincipal = document.getElementById('escalaoPrincipal').value;
+            const escSecundario = document.getElementById('escalaoSecundario').value;
+            
+            // Combina os escalões separados por vírgula se o secundário estiver preenchido
+            let escaloesCombinados = escPrincipal;
+            if (escSecundario && escSecundario !== "") {
+                escaloesCombinados = `${escPrincipal}, ${escSecundario}`;
+            }
+
             const atleta = {
                 nome: document.getElementById('nome').value,
                 posicao: document.getElementById('posicao').value,
-                escalao: escalaoSelecionado,
+                escaloes: escaloesCombinados,
                 numeroAtleta: parseInt(document.getElementById('numeroAtleta').value) || null,
                 idade: parseInt(document.getElementById('idade').value) || null,
                 altura: parseFloat(document.getElementById('altura').value) || null,
@@ -558,6 +575,14 @@
             document.getElementById('atletaId').value = atleta.id;
             document.getElementById('nome').value = atleta.nome || '';
             document.getElementById('posicao').value = atleta.posicao || 'Ala';
+            
+            // Separar os escalões gravados para preencher os selects do formulário
+            if (atleta.escaloes) {
+                const partes = atleta.escaloes.split(',').map(e => e.trim());
+                document.getElementById('escalaoPrincipal').value = partes[0] || 'Petrizes';
+                document.getElementById('escalaoSecundario').value = partes[1] || '';
+            }
+
             document.getElementById('numeroAtleta').value = atleta.numeroAtleta || '';
             document.getElementById('idade').value = atleta.idade || '';
             document.getElementById('altura').value = atleta.altura || '';
@@ -568,7 +593,6 @@
             document.getElementById('condicaoFisica').value = atleta.condicaoFisica || '';
             document.getElementById('encarregadoEducacao').value = atleta.encarregadoEducacao || '';
             
-            // Garantir que todos os campos de escolha e observações carregam corretamente ao editar
             document.getElementById('avaliacao').value = atleta.avaliacao || 'Bom';
             document.getElementById('nivelCansaco').value = atleta.nivelCansaco || 'Moderado';
             document.getElementById('descanso').value = atleta.descanso || 'Adequado';
