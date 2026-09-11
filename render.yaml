@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: futsal-app
+    env: docker
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://<teu-host-supabase>:5432/postgres
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: Amanu13081981__
