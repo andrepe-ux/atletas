@@ -120,7 +120,7 @@
         .filters-bar div { flex: 1; min-width: 150px; }
 
         .table-container { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1250px; }
         th, td { border-bottom: 1px solid #eee; padding: 12px 14px; text-align: left; font-size: 0.88rem; color: #333; }
         th { background-color: #f8f9fa; color: #007bff; position: sticky; top: 0; z-index: 10; font-weight: bold; border-bottom: 2px solid #dee2e6; }
         tr:hover { background-color: #f8f9fa; }
@@ -294,7 +294,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Condição Física (Valor numérico ou %):</label>
+                        <label>Condição Física:</label>
                         <input type="text" id="condicaoFisica" placeholder="Ex: 45 ou 80%">
                     </div>
 
@@ -450,7 +450,6 @@
             }
 
             atletas.forEach(a => {
-                // Lógica de Alerta: Condição física < 50 OU Cansaço Elevado/Exausto
                 let condFisicaNum = parseInt(String(a.condicaoFisica || "").replace(/[^0-9]/g, '')) || 100;
                 let cansaco = (a.nivelCansaco || "").trim();
                 let precisaAvaliar = (condFisicaNum < 50) || (cansaco === 'Elevado' || cansaco === 'Exausto');
@@ -569,6 +568,7 @@
             document.getElementById('condicaoFisica').value = atleta.condicaoFisica || '';
             document.getElementById('encarregadoEducacao').value = atleta.encarregadoEducacao || '';
             
+            // Garantir que todos os campos de escolha e observações carregam corretamente ao editar
             document.getElementById('avaliacao').value = atleta.avaliacao || 'Bom';
             document.getElementById('nivelCansaco').value = atleta.nivelCansaco || 'Moderado';
             document.getElementById('descanso').value = atleta.descanso || 'Adequado';
