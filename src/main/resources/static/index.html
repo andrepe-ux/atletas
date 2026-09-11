@@ -8,19 +8,19 @@
         *, *::before, *::after { box-sizing: border-box; }
         body {
             margin: 0; padding: 0;
-            background-color: #121212; color: #e0e0e0;
+            background-color: #f4f6f9; color: #333333;
             font-family: Arial, sans-serif;
             min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
             overflow-x: hidden;
         }
         #app-scaler {
-            width: 100%; max-width: 1400px; min-height: 100vh;
+            width: 100%; max-width: 1560px; min-height: 100vh;
             display: flex; flex-direction: column; position: relative;
             padding: 10px;
         }
         @media (min-width: 768px) {
-            #app-scaler { height: 850px; min-height: unset; border: 1px solid #333; border-radius: 10px; background: #181818; overflow: hidden; }
+            #app-scaler { height: 900px; min-height: unset; border: 1px solid #dcdcdc; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
         }
 
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; flex: 1; }
@@ -28,102 +28,139 @@
 
         .escaloes-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px; padding: 25px; overflow-y: auto; flex: 1;
+            gap: 20px; padding: 30px; overflow-y: auto; flex: 1;
+            background-color: #f8f9fa;
         }
         .card-escalao {
-            background: #1a1a1a; border: 1px solid #333; border-radius: 10px;
+            background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px;
             padding: 30px; text-align: center; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .card-escalao:hover { border-color: #00ffcc; background: #222; transform: translateY(-3px); }
-        .card-escalao h3 { color: #00ffcc; margin: 0 0 8px 0; font-size: 1.2rem; }
-        .card-escalao p { color: #888; font-size: 0.85rem; margin: 0; }
+        .card-escalao:hover { border-color: #007bff; background: #fdfdfd; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,123,255,0.1); }
+        .card-escalao h3 { color: #007bff; margin: 0 0 8px 0; font-size: 1.25rem; }
+        .card-escalao p { color: #666; font-size: 0.85rem; margin: 0; }
 
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            background: #1a1a1a; border-bottom: 1px solid #333; padding: 12px 20px;
-            border-radius: 8px 8px 0 0;
+            background: #ffffff; border-bottom: 1px solid #e0e0e0; padding: 14px 22px;
+            border-radius: 10px 10px 0 0;
         }
         .main-layout {
-            display: flex; width: 100%; height: calc(100% - 60px);
+            display: flex; width: 100%; height: calc(100% - 65px);
             gap: 15px; padding: 15px; box-sizing: border-box; overflow: hidden;
-            flex-direction: column;
+            flex-direction: column; background-color: #f8f9fa;
         }
         .panel {
-            background: #1a1a1a; border: 1px solid #333;
-            border-radius: 8px; display: flex; flex-direction: column; padding: 15px; flex: 1; overflow: hidden;
+            background: #ffffff; border: 1px solid #e0e0e0;
+            border-radius: 10px; display: flex; flex-direction: column; padding: 15px; flex: 1; overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
         
         .panel-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px;
+            margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;
         }
-        .panel-header h3 { margin: 0; font-size: 1.1rem; color: #00ffcc; }
+        .panel-header h3 { margin: 0; font-size: 1.15rem; color: #222; }
         
-        /* Modal Expandido e Totalmente Responsivo */
+        /* Modal Expandido Claro e Responsivo */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); z-index: 1000; justify-content: center; align-items: center;
-            padding: 10px;
+            background: rgba(0, 0, 0, 0.4); z-index: 1000; justify-content: center; align-items: center;
+            padding: 10px; backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: #1a1a1a; border: 1px solid #00ffcc; border-radius: 10px;
-            width: 100%; max-width: 850px; max-height: 95vh; overflow-y: auto; padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7); position: relative;
+            background: #ffffff; border: 1px solid #dcdcdc; border-radius: 12px;
+            width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); position: relative;
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px;
+            margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;
         }
-        .modal-header h3 { margin: 0; color: #00ffcc; font-size: 1.15rem; }
+        .modal-header h3 { margin: 0; color: #007bff; font-size: 1.25rem; }
 
         .form-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
         }
-        .form-group { margin-bottom: 10px; }
+        .form-group { margin-bottom: 8px; }
         .form-group.full-width { grid-column: 1 / -1; }
 
-        label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 4px; }
+        label { display: block; font-size: 0.82rem; color: #444; font-weight: bold; margin-bottom: 5px; }
         input, select, textarea {
-            width: 100%; padding: 9px; background-color: #252525;
-            border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.9rem; box-sizing: border-box;
+            width: 100%; padding: 10px; background-color: #fdfdfd;
+            border: 1px solid #ccc; border-radius: 6px; color: #222; font-size: 0.9rem; box-sizing: border-box;
         }
-        input:focus, select:focus, textarea:focus { border-color: #00ffcc; outline: none; }
-        textarea { resize: vertical; min-height: 70px; }
+        input:focus, select:focus, textarea:focus { border-color: #007bff; outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        textarea { resize: vertical; min-height: 80px; }
         
         .btn-action {
-            width: 100%; background-color: #00ffcc; color: #000;
-            font-weight: bold; padding: 11px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; margin-top: 15px;
+            width: 100%; background-color: #007bff; color: #fff;
+            font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 20px;
+            transition: background 0.2s;
         }
-        .btn-action:hover { background-color: #00cca3; }
+        .btn-action:hover { background-color: #0056b3; }
         .btn-secondary {
-            background-color: #333; color: #fff; border: 1px solid #444;
-            padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s;
+            background-color: #e9ecef; color: #333; border: 1px solid #ced4da;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s;
         }
-        .btn-secondary:hover { background-color: #444; border-color: #00ffcc; }
+        .btn-secondary:hover { background-color: #dde2e6; border-color: #adb5bd; }
         .btn-cancel {
-            width: 100%; background-color: #2a2a2a; color: #aaa;
-            font-weight: bold; padding: 9px; border: 1px solid #444; border-radius: 5px; cursor: pointer; font-size: 0.85rem; margin-top: 6px;
+            width: 100%; background-color: #f1f3f5; color: #495057;
+            font-weight: bold; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-top: 8px;
         }
-        .btn-cancel:hover { background-color: #333; color: #fff; }
+        .btn-cancel:hover { background-color: #e2e6ea; }
 
         .filters-bar {
-            display: flex; gap: 10px; margin-bottom: 12px; background: #141414;
-            padding: 10px; border-radius: 6px; border: 1px solid #333; align-items: center; flex-wrap: wrap;
+            display: flex; gap: 12px; margin-bottom: 15px; background: #fdfdfd;
+            padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; align-items: center; flex-wrap: wrap;
         }
-        .filters-bar div { flex: 1; min-width: 140px; }
+        .filters-bar div { flex: 1; min-width: 150px; }
 
-        .table-container { flex: 1; overflow-y: auto; border: 1px solid #333; border-radius: 6px; background: #111; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th, td { border-bottom: 1px solid #222; padding: 12px; text-align: left; font-size: 0.85rem; }
-        th { background-color: #1a1a1a; color: #00ffcc; position: sticky; top: 0; z-index: 1; }
-        img.avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid #00ffcc; }
+        .table-container { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th, td { border-bottom: 1px solid #eee; padding: 12px 14px; text-align: left; font-size: 0.88rem; color: #333; }
+        th { background-color: #f8f9fa; color: #007bff; position: sticky; top: 0; z-index: 10; font-weight: bold; border-bottom: 2px solid #dee2e6; }
+        tr:hover { background-color: #f8f9fa; }
+        
+        /* Destaque de Alerta na Linha se Condição < 50 ou Cansaço Elevado/Exausto */
+        tr.alerta-atleta {
+            background-color: #fff3f3 !important;
+        }
+        tr.alerta-atleta:hover {
+            background-color: #ffe6e6 !important;
+        }
+        .badge-alerta {
+            background-color: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px;
+            font-size: 0.75rem; font-weight: bold; display: inline-block; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Efeito de zoom na fotografia ao passar o rato */
+        img.avatar {
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;
+            transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+            cursor: pointer;
+            transform-origin: center center;
+        }
+        img.avatar:hover {
+            transform: scale(2.8);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            z-index: 100;
+            position: relative;
+        }
         
         .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background-color: #ffc107; color: #000; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold; }
-        .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: bold; }
+        .btn-edit { background-color: #ffc107; color: #212529; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-edit:hover { background-color: #e0a800; }
+        .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-delete:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
@@ -133,7 +170,7 @@
         <!-- 1. ECRÃ DE SELEÇÃO DE ESCALÃO -->
         <div id="escalaoScreen" class="screen active">
             <div class="top-nav-bar">
-                <h3 style="margin: 0; color: #00ffcc; font-size: 1.1rem;">Futsal PRO - Selecione o Escalão</h3>
+                <h3 style="margin: 0; color: #007bff; font-size: 1.15rem;">Futsal PRO - Selecione o Escalão</h3>
             </div>
             <div class="escaloes-grid" id="gridEscaloes"></div>
         </div>
@@ -143,9 +180,9 @@
             <div class="top-nav-bar">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn-secondary" onclick="irParaEscaloes()">⬅ Voltar Escalões</button>
-                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: #00ffcc; font-size: 1.1rem;">Escalão</h3>
+                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: #007bff; font-size: 1.15rem;">Escalão</h3>
                 </div>
-                <button class="btn-secondary" style="background-color: #00ffcc; color: #000; border-color: #00ffcc;" onclick="abrirModalCriacao()">+ Inserir Atleta</button>
+                <button class="btn-secondary" style="background-color: #007bff; color: #fff; border-color: #007bff;" onclick="abrirModalCriacao()">+ Inserir Atleta</button>
             </div>
             
             <div class="main-layout">
@@ -179,10 +216,15 @@
                                     <th>Nº</th>
                                     <th>Nome</th>
                                     <th>Posição</th>
+                                    <th>Idade</th>
+                                    <th>Cond. Física</th>
                                     <th>Avaliação</th>
                                     <th>Cansaço</th>
+                                    <th>Descanso</th>
+                                    <th>Alimentação</th>
                                     <th>Escola</th>
                                     <th>Status</th>
+                                    <th>Alerta</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -195,12 +237,12 @@
 
     </div>
 
-    <!-- MODAL DO CRUD EXPANDIDO (Com seleções e observações) -->
+    <!-- MODAL DO CRUD EXPANDIDO -->
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="formTitle">Inserir Novo Atleta</h3>
-                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="fecharModal()">✕</button>
+                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="fecharModal()">✕</button>
             </div>
             <form id="atletaForm">
                 <input type="hidden" id="atletaId">
@@ -252,11 +294,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Condição Física:</label>
-                        <input type="text" id="condicaoFisica" placeholder="Ex: 100%">
+                        <label>Condição Física (Valor numérico ou %):</label>
+                        <input type="text" id="condicaoFisica" placeholder="Ex: 45 ou 80%">
                     </div>
 
-                    <!-- NOVOS CAMPOS POR ESCOLHA -->
+                    <!-- CAMPOS POR ESCOLHA -->
                     <div class="form-group">
                         <label>Avaliação:</label>
                         <select id="avaliacao">
@@ -302,7 +344,7 @@
                     </div>
                     <div class="form-group">
                         <label>Fotografia:</label>
-                        <input type="file" id="fotoInput" accept="image/*" style="padding: 5px; background: #252525; border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 0.85rem;">
+                        <input type="file" id="fotoInput" accept="image/*" style="padding: 5px; background: #fff; border: 1px solid #ccc; border-radius: 5px; color: #333; font-size: 0.85rem;">
                     </div>
 
                     <div class="form-group full-width">
@@ -328,7 +370,7 @@
         let escalaoSelecionado = '';
 
         const escaloesLista = [
-            "Petizes", "Traquinas", "Benjamins", "Infantis", 
+            "Petrizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
 
@@ -403,21 +445,35 @@
             tbody.innerHTML = '';
 
             if (atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #777; padding: 20px;">Nenhum atleta registado neste escalão.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="14" style="text-align: center; color: #777; padding: 25px;">Nenhum atleta registado neste escalão.</td></tr>`;
                 return;
             }
 
             atletas.forEach(a => {
+                // Lógica de Alerta: Condição física < 50 OU Cansaço Elevado/Exausto
+                let condFisicaNum = parseInt(String(a.condicaoFisica || "").replace(/[^0-9]/g, '')) || 100;
+                let cansaco = (a.nivelCansaco || "").trim();
+                let precisaAvaliar = (condFisicaNum < 50) || (cansaco === 'Elevado' || cansaco === 'Exausto');
+
                 const tr = document.createElement('tr');
+                if (precisaAvaliar) {
+                    tr.className = 'alerta-atleta';
+                }
+
                 tr.innerHTML = `
-                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:#555;">Sem foto</span>'}</td>
-                    <td><span style="color: #ffcc00; font-weight: bold;">${a.numeroAtleta || '-'}</span></td>
+                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:#aaa;">Sem foto</span>'}</td>
+                    <td><span style="color: #007bff; font-weight: bold;">${a.numeroAtleta || '-'}</span></td>
                     <td>${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
+                    <td>${a.idade || '-'}</td>
+                    <td><span style="font-weight: bold; color: ${condFisicaNum < 50 ? '#d9534f' : '#333'};">${a.condicaoFisica || '-'}</span></td>
                     <td>${a.avaliacao || '-'}</td>
-                    <td><span style="color: ${a.nivelCansaco === 'Elevado' || a.nivelCansaco === 'Exausto' ? '#ff5555' : '#00ffcc'};">${a.nivelCansaco || '-'}</span></td>
+                    <td><span style="color: ${cansaco === 'Elevado' || cansaco === 'Exausto' ? '#d9534f' : '#28a745'}; font-weight: bold;">${cansaco || '-'}</span></td>
+                    <td>${a.descanso || '-'}</td>
+                    <td>${a.alimentacao || '-'}</td>
                     <td>${a.aproveitamentoEscolar || '-'}</td>
-                    <td><span style="color: ${a.status === 'Disponivel' ? '#00ffcc' : '#ff5555'}; font-weight: bold;">${a.status || ''}</span></td>
+                    <td><span style="color: ${a.status === 'Disponivel' ? '#28a745' : '#d9534f'}; font-weight: bold;">${a.status || ''}</span></td>
+                    <td>${precisaAvaliar ? `<span class="badge-alerta">⚠️ Avaliar Atleta</span>` : '<span style="color: #28a745; font-size: 0.8rem;">Normal</span>'}</td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="prepararEdicao(${a.id})">Editar</button>
@@ -512,6 +568,7 @@
             document.getElementById('status').value = atleta.status || 'Disponivel';
             document.getElementById('condicaoFisica').value = atleta.condicaoFisica || '';
             document.getElementById('encarregadoEducacao').value = atleta.encarregadoEducacao || '';
+            
             document.getElementById('avaliacao').value = atleta.avaliacao || 'Bom';
             document.getElementById('nivelCansaco').value = atleta.nivelCansaco || 'Moderado';
             document.getElementById('descanso').value = atleta.descanso || 'Adequado';
