@@ -6,7 +6,7 @@
     <title>Futsal PRO - Gestão de Atletas</title>
     <style>
         :root {
-            --bg-body: #121212;
+            --bg-body: #ffffff;
             --bg-scaler: #ffffff;
             --bg-panel: #ffffff;
             --bg-card: #f8f9fa;
@@ -54,14 +54,11 @@
         }
         
         #app-scaler {
-            width: 1280px; height: 720px;
+            width: 100vw; height: 100vw;
             max-width: 100vw; max-height: 100vh;
-            transform-origin: center center;
             display: flex; flex-direction: column; position: relative;
             background: var(--bg-scaler);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: none; border-radius: 0; box-shadow: none;
             overflow: hidden;
         }
 
@@ -91,63 +88,80 @@
 
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 10px 15px;
-            flex-shrink: 0;
+            background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 12px 20px;
+            flex-shrink: 0; z-index: 2;
         }
         .main-layout {
-            display: flex; width: 100%; height: calc(100% - 50px);
-            gap: 8px; padding: 8px; box-sizing: border-box; overflow: hidden;
+            display: flex; width: 100%; height: calc(100% - 60px);
+            gap: 12px; padding: 12px; box-sizing: border-box; overflow: hidden;
+            flex-direction: column; position: relative;
         }
+        
         .panel {
             background: var(--bg-panel); border: 1px solid var(--border-color);
-            border-radius: 8px; display: flex; flex-direction: column; padding: 12px; height: 100%;
+            border-radius: 8px; display: flex; flex-direction: column; padding: 15px; height: 100%;
         }
-        .left-panel { flex: 1.3; overflow-y: auto; display: none; }
+        .right-panel { width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* MODAL FLUTUANTE PARA INSERIR / EDITAR ATLETA */
+        .left-panel {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px);
+            justify-content: center; align-items: center; z-index: 100; padding: 20px;
+        }
         .left-panel.active { display: flex; }
-        .right-panel { flex: 2.7; overflow: hidden; display: flex; flex-direction: column; }
+        .form-card-modal {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 10px; width: 100%; max-width: 650px; max-height: 90vh;
+            overflow-y: auto; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
 
         .panel-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; flex-shrink: 0;
+            margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; flex-shrink: 0;
         }
-        .panel-header h3 { margin: 0; font-size: 1rem; color: var(--accent-color); }
+        .panel-header h3 { margin: 0; font-size: 1.1rem; color: var(--accent-color); }
         
-        form div { margin-bottom: 8px; }
-        label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px; }
+        form div { margin-bottom: 10px; }
+        label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px; font-weight: bold; }
         input, select, textarea {
-            width: 100%; padding: 7px 10px; background-color: var(--input-bg);
+            width: 100%; padding: 8px 10px; background-color: var(--input-bg);
             border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.85rem; box-sizing: border-box;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; }
         
+        .form-row { display: flex; gap: 10px; }
+        .form-row > div { flex: 1; }
+
         .btn-action {
             width: 100%; background-color: var(--accent-color); color: #fff;
-            font-weight: bold; padding: 9px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; margin-top: 5px;
+            font-weight: bold; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.95rem; margin-top: 10px;
         }
         .btn-action:hover { background-color: var(--accent-hover); }
         
         .btn-secondary {
             background-color: var(--bg-card); color: var(--text-color); border: 1px solid var(--border-color);
-            padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+            padding: 7px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
             display: inline-flex; align-items: center; gap: 5px;
         }
         .btn-secondary:hover { background-color: var(--border-color); }
 
         .btn-cancel {
             width: 100%; background-color: var(--border-color); color: var(--text-color);
-            font-weight: bold; padding: 6px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-top: 4px; display: none;
+            font-weight: bold; padding: 8px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; margin-top: 6px; display: none;
         }
         .btn-toggle-form {
             background-color: var(--accent-color); color: #fff; border: none;
-            padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+            padding: 7px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
         }
         .btn-toggle-form:hover { background-color: var(--accent-hover); }
 
         .filters-bar {
-            display: flex; gap: 8px; margin-bottom: 10px; background: var(--filters-bg);
-            padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); align-items: center; flex-shrink: 0;
+            display: flex; gap: 10px; margin-bottom: 12px; background: var(--filters-bg);
+            padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); align-items: center; flex-shrink: 0;
+            flex-wrap: wrap;
         }
-        .filters-bar div { flex: 1; }
+        .filters-bar div { flex: 1; min-width: 150px; }
 
         .table-container { 
             flex: 1; overflow-y: auto; overflow-x: auto; 
@@ -155,24 +169,37 @@
             background: var(--bg-panel); color: var(--text-color);
             position: relative;
         }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: left; }
-        th, td { border-bottom: 1px solid var(--border-color); padding: 8px; font-size: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; text-align: left; }
+        th, td { border-bottom: 1px solid var(--border-color); padding: 10px; font-size: 0.8rem; vertical-align: middle; }
         
         th { 
             background-color: var(--table-header-bg); color: var(--text-color); 
-            position: sticky; top: 0; z-index: 1; font-weight: bold;
+            position: sticky; top: 0; z-index: 2; font-weight: bold;
         }
         tbody tr:nth-child(even) { background-color: var(--table-row-even); }
         tbody tr:hover { background-color: var(--table-row-hover); }
 
-        img.avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        img.avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
         
         .action-btns { display: flex; gap: 4px; }
-        .btn-edit { background-color: #f59e0b; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .btn-edit { background-color: #f59e0b; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
         .btn-edit:hover { background-color: #d97706; }
-        .btn-delete { background-color: #ef4444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .btn-delete { background-color: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
         .btn-delete:hover { background-color: #dc2626; }
         
+        /* ALERTA DE FADIGA / CONDIÇÃO FÍSICA CRÍTICA */
+        .badge-alerta {
+            background-color: #fee2e2; color: #dc2626; border: 1px solid #f87171;
+            padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.72rem;
+            display: inline-flex; align-items: center; gap: 4px; animation: pulse 1.5s infinite;
+        }
+        [data-theme="dark"] .badge-alerta { background-color: #7f1d1d; color: #fca5a5; border-color: #ef4444; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
         .erro-login { color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: none; }
 
         /* LOADING COM BOLA DE FUTSAL ANIMADA */
@@ -248,88 +275,140 @@
                     <h3 id="tituloEscalaoAtual" style="margin: 0; color: var(--accent-color); font-size: 1rem;">Escalão</h3>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="btn-toggle-form" id="btnInserirAtletaTop" onclick="toggleFormulario()">+ Gerir / Inserir Atleta</button>
+                    <button class="btn-toggle-form" id="btnInserirAtletaTop" onclick="toggleFormulario()">+ Inserir Novo Atleta</button>
                     <button class="btn-secondary" onclick="alternarTema()" id="btnTemaDashboard">🌙 Modo Escuro</button>
                 </div>
             </div>
             
             <div class="main-layout">
-                <!-- Painel Esquerdo: Menu Oculto para Inserir / Editar Atleta (Completo) -->
+                
+                <!-- MODAL FLUTUANTE DE EDIÇÃO / CRIAÇÃO DE ATLETA -->
                 <div class="panel left-panel" id="formPanel">
-                    <div class="panel-header">
-                        <h3 id="formTitle">Inserir Novo Atleta</h3>
-                    </div>
-                    <form id="atletaForm">
-                        <input type="hidden" id="atletaId">
-                        <div>
-                            <label for="nome">Nome:</label>
-                            <input type="text" id="nome" autocomplete="name" required>
+                    <div class="form-card-modal">
+                        <div class="panel-header">
+                            <h3 id="formTitle">Inserir Novo Atleta</h3>
+                            <button class="btn-secondary" onclick="toggleFormulario()" style="padding: 2px 8px;">✕</button>
                         </div>
-                        <div>
-                            <label for="posicao">Posição:</label>
-                            <select id="posicao" autocomplete="off">
-                                <option value="Guarda-Redes">Guarda-Redes</option>
-                                <option value="Fixo">Fixo</option>
-                                <option value="Ala">Ala</option>
-                                <option value="Pívot">Pívot</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="escaloes">Escalões (Múltiplos):</label>
-                            <input type="text" id="escaloes" autocomplete="off" placeholder="Ex: Juvenis, Juniores">
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label for="numeroAtleta">Nº Atleta:</label><input type="number" id="numeroAtleta" autocomplete="off"></div>
-                            <div style="flex: 1;"><label for="idade">Idade:</label><input type="number" id="idade" autocomplete="off"></div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label for="altura">Altura (m):</label><input type="number" step="0.01" id="altura" autocomplete="off"></div>
-                            <div style="flex: 1;"><label for="peso">Peso (kg):</label><input type="number" step="0.1" id="peso" autocomplete="off"></div>
-                        </div>
-                        <div>
-                            <label for="telemovel">Telemóvel:</label>
-                            <input type="text" id="telemovel" autocomplete="tel">
-                        </div>
-                        <div>
-                            <label for="email">Email:</label>
-                            <input type="email" id="email" autocomplete="email">
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;">
-                                <label for="status">Status:</label>
-                                <select id="status" autocomplete="off">
-                                    <option value="Disponivel">Disponível</option>
-                                    <option value="Lesionado">Lesionado</option>
-                                    <option value="Ausente">Ausente</option>
+                        <form id="atletaForm">
+                            <input type="hidden" id="atletaId">
+                            
+                            <div>
+                                <label for="nome">Nome Completo:</label>
+                                <input type="text" id="nome" autocomplete="name" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div>
+                                    <label for="posicao">Posição:</label>
+                                    <select id="posicao" autocomplete="off">
+                                        <option value="Guarda-Redes">Guarda-Redes</option>
+                                        <option value="Fixo">Fixo</option>
+                                        <option value="Ala">Ala</option>
+                                        <option value="Pívot">Pívot</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="escaloes">Escalões:</label>
+                                    <input type="text" id="escaloes" autocomplete="off" placeholder="Ex: Juvenis">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div><label for="numeroAtleta">Nº:</label><input type="number" id="numeroAtleta" autocomplete="off"></div>
+                                <div><label for="idade">Idade:</label><input type="number" id="idade" autocomplete="off"></div>
+                                <div><label for="altura">Altura (m):</label><input type="number" step="0.01" id="altura" autocomplete="off"></div>
+                                <div><label for="peso">Peso (kg):</label><input type="number" step="0.1" id="peso" autocomplete="off"></div>
+                            </div>
+
+                            <div class="form-row">
+                                <div><label for="telemovel">Telemóvel:</label><input type="text" id="telemovel" autocomplete="tel"></div>
+                                <div><label for="email">Email:</label><input type="email" id="email" autocomplete="email"></div>
+                            </div>
+
+                            <div class="form-row">
+                                <div>
+                                    <label for="status">Status:</label>
+                                    <select id="status" autocomplete="off">
+                                        <option value="Disponivel">Disponível</option>
+                                        <option value="Lesionado">Lesionado</option>
+                                        <option value="Ausente">Ausente</option>
+                                    </select>
+                                </div>
+                                <div><label for="condicaoFisica">Cond. Física (%):</label><input type="text" id="condicaoFisica" autocomplete="off" placeholder="Ex: 50"></div>
+                            </div>
+
+                            <div class="form-row">
+                                <div>
+                                    <label for="avaliacao">Avaliação:</label>
+                                    <select id="avaliacao" autocomplete="off">
+                                        <option value="Excelente">Excelente</option>
+                                        <option value="Bom">Bom</option>
+                                        <option value="Regular">Regular</option>
+                                        <option value="Insuficiente">Insuficiente</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="nivelCansaco">Nível Cansaço:</label>
+                                    <select id="nivelCansaco" autocomplete="off">
+                                        <option value="Baixo">Baixo</option>
+                                        <option value="Moderado">Moderado</option>
+                                        <option value="Elevado">Elevado</option>
+                                        <option value="Exausto">Exausto</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div>
+                                    <label for="descanso">Descanso:</label>
+                                    <select id="descanso" autocomplete="off">
+                                        <option value="Bom">Bom</option>
+                                        <option value="Regular">Regular</option>
+                                        <option value="Insuficiente">Insuficiente</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="alimentacao">Alimentação:</label>
+                                    <select id="alimentacao" autocomplete="off">
+                                        <option value="Equilibrada">Equilibrada</option>
+                                        <option value="Razoável">Razoável</option>
+                                        <option value="Desregrada">Desregrada</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="aproveitamentoEscolar">Aproveitamento Escolar:</label>
+                                <select id="aproveitamentoEscolar" autocomplete="off">
+                                    <option value="Muito Bom">Muito Bom</option>
+                                    <option value="Bom">Bom</option>
+                                    <option value="Suficiente">Suficiente</option>
+                                    <option value="Precisa Melhorar">Precisa Melhorar</option>
                                 </select>
                             </div>
-                            <div style="flex: 1;"><label for="condicaoFisica">Condição Física:</label><input type="text" id="condicaoFisica" autocomplete="off" placeholder="Ex: 100%"></div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label for="avaliacao">Avaliação:</label><input type="text" id="avaliacao" autocomplete="off"></div>
-                            <div style="flex: 1;"><label for="nivelCansaco">Nível Cansaço:</label><input type="text" id="nivelCansaco" autocomplete="off"></div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div style="flex: 1;"><label for="descanso">Descanso:</label><input type="text" id="descanso" autocomplete="off"></div>
-                            <div style="flex: 1;"><label for="alimentacao">Alimentação:</label><input type="text" id="alimentacao" autocomplete="off"></div>
-                        </div>
-                        <div><label for="aproveitamentoEscolar">Aproveitamento Escolar:</label><input type="text" id="aproveitamentoEscolar" autocomplete="off"></div>
-                        <div><label for="encarregadoEducacao">Encarregado de Educação (EE):</label><input type="text" id="encarregadoEducacao" autocomplete="name"></div>
-                        <div><label for="telemovelEE">Telemóvel EE:</label><input type="text" id="telemovelEE" autocomplete="tel"></div>
-                        <div><label for="observacoes">Observações:</label><textarea id="observacoes" rows="2" autocomplete="off"></textarea></div>
-                        <div>
-                            <label for="fotoInput">Foto:</label>
-                            <input type="file" id="fotoInput" accept="image/*" autocomplete="off" style="display: block; padding: 4px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.8rem;">
-                        </div>
-                        <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
-                        <button type="button" id="btnCancel" class="btn-cancel" onclick="limparFormulario()">Fechar / Cancelar</button>
-                    </form>
+
+                            <div class="form-row">
+                                <div><label for="encarregadoEducacao">Encarregado de Educação:</label><input type="text" id="encarregadoEducacao" autocomplete="name"></div>
+                                <div><label for="telemovelEE">Telemóvel EE:</label><input type="text" id="telemovelEE" autocomplete="tel"></div>
+                            </div>
+
+                            <div><label for="observacoes">Observações:</label><textarea id="observacoes" rows="2" autocomplete="off"></textarea></div>
+                            
+                            <div>
+                                <label for="fotoInput">Foto do Atleta:</label>
+                                <input type="file" id="fotoInput" accept="image/*" autocomplete="off" style="display: block; padding: 4px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.8rem;">
+                            </div>
+
+                            <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
+                            <button type="button" id="btnCancel" class="btn-cancel" onclick="limparFormulario()">Fechar / Cancelar</button>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- Painel Direito: Listagem com Filtros Originais e Loading -->
+                <!-- Painel Principal de Plantel e Listagem Detalhada -->
                 <div class="panel right-panel">
                     <div class="panel-header">
-                        <h3>Plantel Registado na Base de Dados</h3>
+                        <h3>Plantel Detalhado da Base de Dados</h3>
                     </div>
 
                     <div class="filters-bar">
@@ -367,7 +446,7 @@
                         <!-- Overlay de Loading com Bola de Futsal Animada -->
                         <div id="loadingOverlay">
                             <div class="futsal-ball"></div>
-                            <div class="loading-text" id="loadingText">A ligar à base de dados...</div>
+                            <div class="loading-text" id="loadingText">A ligar ao servidor Spring Boot...</div>
                         </div>
 
                         <table>
@@ -379,13 +458,16 @@
                                     <th>Posição</th>
                                     <th>Escalões</th>
                                     <th>Idade</th>
-                                    <th>Status</th>
+                                    <th>Status / Alerta</th>
+                                    <th>Cond. Física</th>
+                                    <th>Cansaço</th>
+                                    <th>Avaliação</th>
                                     <th>Telemóvel</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaAtletas">
-                                <!-- Preenchido via JS -->
+                                <!-- Preenchido diretamente via API Online -->
                             </tbody>
                         </table>
                     </div>
@@ -414,7 +496,7 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // Gestão de Tema
+        // Gestão de Tema (Inicia em Modo Claro / Fundo Branco)
         function inicializarTema() {
             const temaSalvo = localStorage.getItem('futsal_tema') || 'light';
             document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -527,18 +609,17 @@
             panel.classList.toggle('active');
         }
 
-        // READ: Carregar Atletas do Servidor Spring Boot
+        // READ: Carregar Atletas diretamente do servidor Spring Boot (Estritamente Online)
         async function carregarAtletas() {
-            mostrarLoading('A descarregar dados do servidor Spring Boot...');
+            mostrarLoading('A descarregar dados da base de dados...');
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Falha ao comunicar com o STS4');
+                if (!response.ok) throw new Error('Erro ao comunicar com o servidor Spring Boot');
                 atletasCache = await response.json();
-                localStorage.setItem('futsal_atletas_cache', JSON.stringify(atletasCache));
             } catch (error) {
-                console.warn('A funcionar offline. A ler cache local...');
-                const dadosLocais = localStorage.getItem('futsal_atletas_cache');
-                atletasCache = dadosLocais ? JSON.parse(dadosLocais) : [];
+                console.error('Erro de ligação:', error);
+                atletasCache = [];
+                alert('Não foi possível ligar ao servidor backend (Spring Boot na porta 8080). Verifique se o servidor está a correr.');
             } finally {
                 esconderLoading();
             }
@@ -555,21 +636,33 @@
             tbody.innerHTML = '';
 
             if (!atletas || atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum atleta encontrado na base de dados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum atleta encontrado na base de dados.</td></tr>`;
                 return;
             }
 
             atletas.forEach(a => {
                 const tr = document.createElement('tr');
                 const statusColor = (a.status === 'Disponivel' || a.status === 'Disponível') ? '#059669' : '#dc2626';
+                
+                // LÓGICA DE ALERTA: Condição física < 60% E Nível de Cansaço Elevado ou Exausto
+                const condFisicaVal = parseFloat(a.condicaoFisica) || 100;
+                const cansaco = (a.nivelCansaco || '').toLowerCase();
+                const temAlerta = condFisicaVal < 60 && (cansaco === 'elevado' || cansaco === 'exausto');
+
                 tr.innerHTML = `
                     <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:var(--text-muted); font-size:0.8rem;">Sem foto</span>'}</td>
                     <td><span style="color: #d97706; font-weight: bold;">${a.numeroAtleta || ''}</span></td>
-                    <td style="font-weight: 500;">${a.nome || ''}</td>
+                    <td style="font-weight: 600;">${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
                     <td>${a.escaloes || ''}</td>
                     <td>${a.idade || ''}</td>
-                    <td><span style="color: ${statusColor}; font-weight: bold;">${a.status || ''}</span></td>
+                    <td>
+                        <span style="color: ${statusColor}; font-weight: bold;">${a.status || ''}</span>
+                        ${temAlerta ? '<br><span class="badge-alerta">⚠️ Fadiga Crítica</span>' : ''}
+                    </td>
+                    <td><span style="font-weight: bold; color: ${condFisicaVal < 60 ? '#dc2626' : 'inherit'};">${a.condicaoFisica ? a.condicaoFisica + '%' : ''}</span></td>
+                    <td>${a.nivelCansaco || ''}</td>
+                    <td>${a.avaliacao || ''}</td>
                     <td>${a.telemovel || ''}</td>
                     <td>
                         <div class="action-btns">
@@ -601,11 +694,11 @@
             renderizarTabela(filtrados);
         }
 
-        // CREATE & UPDATE (Mapeamento completo com todos os campos do modelo Java)
+        // CREATE & UPDATE (Comunicação Direta com o Backend)
         document.getElementById('atletaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            mostrarLoading('A guardar dados do atleta...');
+            mostrarLoading('A guardar dados na base de dados...');
 
             const id = document.getElementById('atletaId').value;
             let fotoBase64 = null;
@@ -660,7 +753,7 @@
                     esconderLoading();
                 }
             } catch (err) {
-                alert('Erro de comunicação com o servidor.');
+                alert('Erro de comunicação com o servidor Spring Boot.');
                 esconderLoading();
             }
         });
@@ -681,11 +774,11 @@
             document.getElementById('email').value = atleta.email || '';
             document.getElementById('status').value = atleta.status || 'Disponivel';
             document.getElementById('condicaoFisica').value = atleta.condicaoFisica || '';
-            document.getElementById('avaliacao').value = atleta.avaliacao || '';
-            document.getElementById('nivelCansaco').value = atleta.nivelCansaco || '';
-            document.getElementById('descanso').value = atleta.descanso || '';
-            document.getElementById('alimentacao').value = atleta.alimentacao || '';
-            document.getElementById('aproveitamentoEscolar').value = atleta.aproveitamentoEscolar || '';
+            document.getElementById('avaliacao').value = atleta.avaliacao || 'Bom';
+            document.getElementById('nivelCansaco').value = atleta.nivelCansaco || 'Baixo';
+            document.getElementById('descanso').value = atleta.descanso || 'Bom';
+            document.getElementById('alimentacao').value = atleta.alimentacao || 'Equilibrada';
+            document.getElementById('aproveitamentoEscolar').value = atleta.aproveitamentoEscolar || 'Bom';
             document.getElementById('encarregadoEducacao').value = atleta.encarregadoEducacao || '';
             document.getElementById('telemovelEE').value = atleta.telemovelEE || '';
             document.getElementById('observacoes').value = atleta.observacoes || '';
@@ -706,7 +799,10 @@
             document.getElementById('formTitle').innerText = 'Inserir Novo Atleta';
             document.getElementById('btnSubmit').innerText = 'Guardar Atleta';
             document.getElementById('btnCancel').style.display = 'none';
-            toggleFormulario();
+            const panel = document.getElementById('formPanel');
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+            }
         }
 
         async function eliminarAtleta(id) {
