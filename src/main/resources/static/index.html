@@ -5,176 +5,292 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Futsal PRO - Gestão de Atletas</title>
     <style>
+        /* Definição de Variáveis de Cores por Tema (Claro por defeito) */
+        :root {
+            --bg-body: #f4f6f9;
+            --bg-scaler: #ffffff;
+            --bg-panel: #ffffff;
+            --bg-card: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --accent-color: #0d9488;
+            --accent-hover: #0f766e;
+            --table-header-bg: #e9ecef;
+            --table-row-even: #f8f9fa;
+            --table-row-hover: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --input-text: #212529;
+            --filters-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --bg-scaler: #181818;
+            --bg-panel: #1a1a1a;
+            --bg-card: #222222;
+            --border-color: #333333;
+            --text-color: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --accent-color: #00ffcc;
+            --accent-hover: #00cca3;
+            --table-header-bg: #1a1a1a;
+            --table-row-even: #151515;
+            --table-row-hover: #222222;
+            --input-bg: #252525;
+            --input-border: #444444;
+            --input-text: #ffffff;
+            --filters-bg: #141414;
+        }
+
         *, *::before, *::after { box-sizing: border-box; }
         body {
             margin: 0; padding: 0;
-            background-color: #f4f6f9; color: #333333;
+            background-color: var(--bg-body); color: var(--text-color);
             font-family: Arial, sans-serif;
             min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
             overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
         #app-scaler {
-            width: 100%; max-width: 1560px; min-height: 100vh;
+            width: 100vw; height: 100vh; max-width: 100%; max-height: 100%;
             display: flex; flex-direction: column; position: relative;
-            padding: 10px;
+            padding: 8px; background: var(--bg-scaler);
+            border: 1px solid var(--border-color);
         }
-        @media (min-width: 768px) {
-            #app-scaler { height: 900px; min-height: unset; border: 1px solid #dcdcdc; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        @media (min-width: 1024px) {
+            #app-scaler { width: 98vw; height: 96vh; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         }
 
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; flex: 1; }
         .screen.active { display: flex; }
 
+        .login-container {
+            margin: auto; width: 100%; max-width: 400px;
+            background: var(--bg-panel); padding: 30px; border-radius: 10px; border: 1px solid var(--border-color);
+            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .login-container h2 { color: var(--accent-color); margin-bottom: 20px; }
+
         .escaloes-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px; padding: 30px; overflow-y: auto; flex: 1;
-            background-color: #f8f9fa;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px; padding: 20px; overflow-y: auto; flex: 1;
         }
         .card-escalao {
-            background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px;
-            padding: 30px; text-align: center; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 25px; text-align: center; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        .card-escalao:hover { border-color: #007bff; background: #fdfdfd; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,123,255,0.1); }
-        .card-escalao h3 { color: #007bff; margin: 0 0 8px 0; font-size: 1.25rem; }
-        .card-escalao p { color: #666; font-size: 0.85rem; margin: 0; }
+        .card-escalao:hover { border-color: var(--accent-color); background: var(--bg-card); transform: translateY(-3px); }
+        .card-escalao.bloqueado { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; background: var(--bg-panel) !important; transform: none !important; }
+        .card-escalao h3 { color: var(--accent-color); margin: 0 0 5px 0; }
+        .card-escalao p { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
 
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            background: #ffffff; border-bottom: 1px solid #e0e0e0; padding: 14px 22px;
-            border-radius: 10px 10px 0 0;
+            background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 12px 20px;
+            border-radius: 6px 6px 0 0; flex-shrink: 0;
         }
+        
         .main-layout {
-            display: flex; width: 100%; height: calc(100% - 65px);
-            gap: 15px; padding: 15px; box-sizing: border-box; overflow: hidden;
-            flex-direction: column; background-color: #f8f9fa;
+            display: flex; width: 100%; height: calc(100% - 60px);
+            gap: 12px; padding: 10px; box-sizing: border-box; overflow: hidden;
+            flex-direction: column;
         }
+        @media (min-width: 1024px) {
+            .main-layout { flex-direction: row; }
+        }
+
         .panel {
-            background: #ffffff; border: 1px solid #e0e0e0;
-            border-radius: 10px; display: flex; flex-direction: column; padding: 15px; flex: 1; overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 8px; display: flex; flex-direction: column; padding: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
+        .left-panel { flex: 1; min-width: 320px; overflow-y: auto; display: none; }
+        .left-panel.active { display: flex; }
+        
+        .right-panel { flex: 3.5; overflow: hidden; display: flex; flex-direction: column; }
         
         .panel-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;
+            margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; flex-shrink: 0;
         }
-        .panel-header h3 { margin: 0; font-size: 1.15rem; color: #222; }
+        .panel-header h3 { margin: 0; font-size: 1.05rem; color: var(--accent-color); }
         
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); z-index: 1000; justify-content: center; align-items: center;
-            padding: 10px; backdrop-filter: blur(2px);
+        form div { margin-bottom: 8px; }
+        label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px; }
+        input, select {
+            width: 100%; padding: 8px; background-color: var(--input-bg);
+            border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.85rem; box-sizing: border-box;
         }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: #ffffff; border: 1px solid #dcdcdc; border-radius: 12px;
-            width: 100%; max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15); position: relative;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;
-        }
-        .modal-header h3 { margin: 0; color: #007bff; font-size: 1.25rem; }
-
-        .form-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        .form-group { margin-bottom: 8px; }
-        .form-group.full-width { grid-column: 1 / -1; }
-
-        label { display: block; font-size: 0.82rem; color: #444; font-weight: bold; margin-bottom: 5px; }
-        input, select, textarea {
-            width: 100%; padding: 10px; background-color: #fdfdfd;
-            border: 1px solid #ccc; border-radius: 6px; color: #222; font-size: 0.9rem; box-sizing: border-box;
-        }
-        input:focus, select:focus, textarea:focus { border-color: #007bff; outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
-        textarea { resize: vertical; min-height: 80px; }
+        input:focus, select:focus { border-color: var(--accent-color); outline: none; }
         
         .btn-action {
-            width: 100%; background-color: #007bff; color: #fff;
-            font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 20px;
-            transition: background 0.2s;
+            width: 100%; background-color: var(--accent-color); color: #fff;
+            font-weight: bold; padding: 9px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; margin-top: 5px;
         }
-        .btn-action:hover { background-color: #0056b3; }
+        .btn-action:hover { background-color: var(--accent-hover); }
+        
         .btn-secondary {
-            background-color: #e9ecef; color: #333; border: 1px solid #ced4da;
-            padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s;
+            background-color: var(--bg-card); color: var(--text-color); border: 1px solid var(--border-color);
+            padding: 7px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 5px;
         }
-        .btn-secondary:hover { background-color: #dde2e6; border-color: #adb5bd; }
+        .btn-secondary:hover { background-color: var(--border-color); }
+        
         .btn-cancel {
-            width: 100%; background-color: #f1f3f5; color: #495057;
-            font-weight: bold; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-top: 8px;
+            width: 100%; background-color: var(--border-color); color: var(--text-color);
+            font-weight: bold; padding: 6px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-top: 4px; display: none;
         }
-        .btn-cancel:hover { background-color: #e2e6ea; }
 
         .filters-bar {
-            display: flex; gap: 12px; margin-bottom: 15px; background: #fdfdfd;
-            padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; align-items: center; flex-wrap: wrap;
+            display: flex; gap: 10px; margin-bottom: 10px; background: var(--filters-bg);
+            padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); align-items: center; flex-wrap: wrap; flex-shrink: 0;
         }
         .filters-bar div { flex: 1; min-width: 150px; }
 
-        .table-container { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
-        table { width: 100%; border-collapse: collapse; min-width: 1250px; }
-        th, td { border-bottom: 1px solid #eee; padding: 12px 14px; text-align: left; font-size: 0.88rem; color: #333; }
-        th { background-color: #f8f9fa; color: #007bff; position: sticky; top: 0; z-index: 10; font-weight: bold; border-bottom: 2px solid #dee2e6; }
-        tr:hover { background-color: #f8f9fa; }
+        .table-container { 
+            flex: 1; overflow-y: auto; overflow-x: auto; 
+            border: 1px solid var(--border-color); border-radius: 6px; 
+            background: var(--bg-panel); color: var(--text-color);
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; text-align: left; }
+        th, td { border-bottom: 1px solid var(--border-color); padding: 12px 14px; font-size: 0.9rem; }
         
-        tr.alerta-atleta { background-color: #fff3f3 !important; }
-        .badge-alerta {
-            background-color: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px;
-            font-size: 0.75rem; font-weight: bold; display: inline-block;
+        th { 
+            background-color: var(--table-header-bg); color: var(--text-color); 
+            position: sticky; top: 0; z-index: 2; 
+            font-weight: bold; border-bottom: 2px solid var(--border-color);
         }
+        tbody tr:nth-child(even) { background-color: var(--table-row-even); }
+        tbody tr:hover { background-color: var(--table-row-hover); }
 
-        img.avatar {
-            width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc;
-            transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
-            cursor: pointer; transform-origin: center center;
-        }
-        img.avatar:hover {
-            transform: scale(2.8); box-shadow: 0 8px 20px rgba(0,0,0,0.25); z-index: 100; position: relative;
-        }
+        img.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
         
         .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background-color: #ffc107; color: #212529; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete { background-color: #dc3545; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-edit { background-color: #f59e0b; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-edit:hover { background-color: #d97706; }
+        .btn-delete { background-color: #ef4444; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-delete:hover { background-color: #dc2626; }
+        
+        .erro-login { color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
+    <script src="auth.js"></script>
+
     <div id="app-scaler">
 
-        <div id="escalaoScreen" class="screen active">
+        <!-- 1. ECRÃ DE LOGIN -->
+        <div id="loginScreen" class="screen active">
+            <div style="position: absolute; top: 15px; right: 15px;">
+                <button class="btn-secondary" onclick="alternarTema()" id="btnTemaLogin">🌙 Modo Escuro</button>
+            </div>
+            <div class="login-container">
+                <h2>Futsal PRO</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Autenticação de Utilizador</p>
+                <form onsubmit="event.preventDefault();" id="loginForm">
+                    <div style="text-align: left;"><label>Utilizador:</label><input type="text" id="userInput" required></div>
+                    <div style="text-align: left;"><label>Palavra-passe:</label><input type="password" id="passInput" required></div>
+                    <button type="button" class="btn-action" onclick="fazerLogin()" style="margin-top: 15px;">Entrar</button>
+                    <p id="erroLoginMsg" class="erro-login">Utilizador ou palavra-passe incorretos.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. ECRÃ DE SELEÇÃO DE ESCALÃO -->
+        <div id="escalaoScreen" class="screen">
             <div class="top-nav-bar">
-                <h3 style="margin: 0; color: #007bff; font-size: 1.15rem;">Futsal PRO - Selecione o Escalão</h3>
+                <div>
+                    <h3 style="margin: 0; color: var(--accent-color); font-size: 1.1rem;" id="saudacaoUtilizador">Selecione o Escalão</h3>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);" id="roleUtilizador">Role</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn-secondary" onclick="alternarTema()" id="btnTemaEscalao">🌙 Modo Escuro</button>
+                    <button class="btn-secondary" onclick="voltarLogin()">Terminar Sessão</button>
+                </div>
             </div>
             <div class="escaloes-grid" id="gridEscaloes"></div>
         </div>
 
+        <!-- 3. ECRÃ DE GESTÃO DE ATLETAS (PRINCIPAL) -->
         <div id="dashboardScreen" class="screen">
             <div class="top-nav-bar">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button class="btn-secondary" onclick="irParaEscaloes()">⬅ Voltar Escalões</button>
-                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: #007bff; font-size: 1.15rem;">Escalão</h3>
+                    <h3 id="tituloEscalaoAtual" style="margin: 0; color: var(--accent-color); font-size: 1.1rem;">Escalão</h3>
                 </div>
-                <button class="btn-secondary" style="background-color: #007bff; color: #fff; border-color: #007bff;" onclick="abrirModalCriacao()">+ Inserir Atleta</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btnInserirAtletaTop" class="btn-secondary" style="background-color: var(--accent-color); color: #fff;" onclick="toggleFormulario()">+ Inserir Atleta</button>
+                    <button class="btn-secondary" onclick="alternarTema()" id="btnTemaDashboard">🌙 Modo Escuro</button>
+                </div>
             </div>
             
             <div class="main-layout">
-                <div class="panel">
+                <!-- Painel Esquerdo: Formulário -->
+                <div class="panel left-panel" id="formPanel">
                     <div class="panel-header">
-                        <h3>Plantel e Gestão de Atletas</h3>
+                        <h3 id="formTitle">Inserir Novo Atleta</h3>
+                    </div>
+                    <form id="atletaForm">
+                        <input type="hidden" id="atletaId">
+                        <div><label>Nome:</label><input type="text" id="nome" required></div>
+                        <div>
+                            <label>Posição:</label>
+                            <select id="posicao">
+                                <option value="Guarda-Redes">Guarda-Redes</option>
+                                <option value="Fixo">Fixo</option>
+                                <option value="Ala">Ala</option>
+                                <option value="Pívot">Pívot</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div style="flex: 1;"><label>Nº Atleta:</label><input type="number" id="numeroAtleta"></div>
+                            <div style="flex: 1;"><label>Idade:</label><input type="number" id="idade"></div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div style="flex: 1;"><label>Altura (m):</label><input type="number" step="0.01" id="altura"></div>
+                            <div style="flex: 1;"><label>Peso (kg):</label><input type="number" step="0.1" id="peso"></div>
+                        </div>
+                        <div><label>Telemóvel:</label><input type="text" id="telemovel"></div>
+                        <div><label>Email:</label><input type="email" id="email"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <div style="flex: 1;">
+                                <label>Status:</label>
+                                <select id="status">
+                                    <option value="Disponivel">Disponível</option>
+                                    <option value="Lesionado">Lesionado</option>
+                                    <option value="Ausente">Ausente</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1;"><label>Cond. Física:</label><input type="text" id="condicaoFisica" placeholder="Ex: 100%"></div>
+                        </div>
+                        <div><label>Encarregado de Educação (EE):</label><input type="text" id="encarregadoEducacao"></div>
+                        <div><label>Telemóvel EE:</label><input type="text" id="telemovelEE"></div>
+                        <div>
+                            <label>Foto:</label>
+                            <input type="file" id="fotoInput" accept="image/*" style="padding: 4px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.8rem;">
+                        </div>
+                        <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
+                        <button type="button" id="btnCancel" class="btn-cancel" onclick="limparFormulario()">Fechar / Cancelar</button>
+                    </form>
+                </div>
+
+                <!-- Painel Direito: Listagem com Base de Dados -->
+                <div class="panel right-panel">
+                    <div class="panel-header">
+                        <h3>Plantel do Escalão (Base de Dados)</h3>
                     </div>
 
                     <div class="filters-bar">
                         <div>
                             <label>Filtrar por Posição:</label>
                             <select id="filtroPosicao" onchange="filtrarAtletas()">
-                                <option value="">Todas as Posições</option>
+                                <option value="">Todas</option>
                                 <option value="Guarda-Redes">Guarda-Redes</option>
                                 <option value="Fixo">Fixo</option>
                                 <option value="Ala">Ala</option>
@@ -182,8 +298,8 @@
                             </select>
                         </div>
                         <div>
-                            <label>Procurar Atleta:</label>
-                            <input type="text" id="filtroNome" placeholder="Nome ou número..." oninput="filtrarAtletas()">
+                            <label>Procurar Nome:</label>
+                            <input type="text" id="filtroNome" placeholder="Nome do atleta..." oninput="filtrarAtletas()">
                         </div>
                     </div>
 
@@ -195,14 +311,10 @@
                                     <th>Nº</th>
                                     <th>Nome</th>
                                     <th>Posição</th>
-                                    <th>Escalões</th>
                                     <th>Idade</th>
-                                    <th>Cond. Física</th>
-                                    <th>Avaliação</th>
-                                    <th>Cansaço</th>
                                     <th>Status</th>
-                                    <th>Alerta</th>
-                                    <th>Ações</th>
+                                    <th>Telemóvel</th>
+                                    <th id="thAcoes">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaAtletas"></tbody>
@@ -214,195 +326,108 @@
 
     </div>
 
-    <!-- MODAL DO CRUD COM SELEÇÃO DE MÚLTIPLOS ESCALÕES -->
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="formTitle">Inserir Novo Atleta</h3>
-                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="fecharModal()">✕</button>
-            </div>
-            <form id="atletaForm">
-                <input type="hidden" id="atletaId">
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nome Completo:</label>
-                        <input type="text" id="nome" required placeholder="Ex: Nome do Atleta">
-                    </div>
-                    <div class="form-group">
-                        <label>Posição:</label>
-                        <select id="posicao">
-                            <option value="Guarda-Redes">Guarda-Redes</option>
-                            <option value="Fixo">Fixo</option>
-                            <option value="Ala">Ala</option>
-                            <option value="Pívot">Pívot</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Escalão Principal:</label>
-                        <select id="escalaoPrincipal" required>
-                            <option value="Petrizes">Petrizes</option>
-                            <option value="Traquinas">Traquinas</option>
-                            <option value="Benjamins">Benjamins</option>
-                            <option value="Infantis">Infantis</option>
-                            <option value="Iniciados">Iniciados</option>
-                            <option value="Juvenis">Juvenis</option>
-                            <option value="Juniores">Juniores</option>
-                            <option value="Seniores">Seniores</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Escalão Secundário (Opcional):</label>
-                        <select id="escalaoSecundario">
-                            <option value="">Nenhum</option>
-                            <option value="Petrizes">Petrizes</option>
-                            <option value="Traquinas">Traquinas</option>
-                            <option value="Benjamins">Benjamins</option>
-                            <option value="Infantis">Infantis</option>
-                            <option value="Iniciados">Iniciados</option>
-                            <option value="Juvenis">Juvenis</option>
-                            <option value="Juniores">Juniores</option>
-                            <option value="Seniores">Seniores</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Nº Camisola:</label>
-                        <input type="number" id="numeroAtleta" placeholder="Ex: 14">
-                    </div>
-                    <div class="form-group">
-                        <label>Idade:</label>
-                        <input type="number" id="idade" placeholder="Ex: 16">
-                    </div>
-                    <div class="form-group">
-                        <label>Altura (m):</label>
-                        <input type="number" step="0.01" id="altura" placeholder="Ex: 1.75">
-                    </div>
-                    <div class="form-group">
-                        <label>Peso (kg):</label>
-                        <input type="number" step="0.1" id="peso" placeholder="Ex: 68.5">
-                    </div>
-                    <div class="form-group">
-                        <label>Telemóvel:</label>
-                        <input type="text" id="telemovel" placeholder="912345678">
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="email" id="email" placeholder="atleta@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Status:</label>
-                        <select id="status">
-                            <option value="Disponivel">Disponível</option>
-                            <option value="Lesionado">Lesionado</option>
-                            <option value="Ausente">Ausente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Condição Física:</label>
-                        <input type="text" id="condicaoFisica" placeholder="Ex: 45 ou 80%">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Avaliação:</label>
-                        <select id="avaliacao">
-                            <option value="Excelente">Excelente</option>
-                            <option value="Bom">Bom</option>
-                            <option value="Regular">Regular</option>
-                            <option value="Insuficiente">Insuficiente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Nível de Cansaço:</label>
-                        <select id="nivelCansaco">
-                            <option value="Baixo">Baixo</option>
-                            <option value="Moderado">Moderado</option>
-                            <option value="Elevado">Elevado</option>
-                            <option value="Exausto">Exausto</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Descanso:</label>
-                        <select id="descanso">
-                            <option value="Adequado">Adequado</option>
-                            <option value="Insuficiente">Insuficiente</option>
-                            <option value="Perturbado">Perturbado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Alimentação:</label>
-                        <select id="alimentacao">
-                            <option value="Regrada / Saudável">Regrada / Saudável</option>
-                            <option value="Razoável">Razoável</option>
-                            <option value="Desregulada">Desregulada</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Aproveitamento Escolar:</label>
-                        <select id="aproveitamentoEscolar">
-                            <option value="Muito Bom">Muito Bom</option>
-                            <option value="Bom">Bom</option>
-                            <option value="Suficiente">Suficiente</option>
-                            <option value="Em Risco / Insuficiente">Em Risco / Insuficiente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Fotografia:</label>
-                        <input type="file" id="fotoInput" accept="image/*" style="padding: 5px; background: #fff; border: 1px solid #ccc; border-radius: 5px; color: #333; font-size: 0.85rem;">
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label>Encarregado de Educação (EE) / Contato:</label>
-                        <input type="text" id="encarregadoEducacao" placeholder="Nome e Telemóvel do EE">
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label>Observações:</label>
-                        <textarea id="observacoes" placeholder="Notas importantes..."></textarea>
-                    </div>
-                </div>
-
-                <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
-                <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-            </form>
-        </div>
-    </div>
-
     <script>
-        const API_URL = '/api/atletas';
+        const API_URL = 'http://localhost:8080/api/atletas';
         let atletasCache = [];
         let escalaoSelecionado = '';
 
         const escaloesLista = [
-            "Petrizes", "Traquinas", "Benjamins", "Infantis", 
+            "Petizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
 
-        window.addEventListener("DOMContentLoaded", () => {
-            carregarEscaloesUI();
-        });
+        // Gestão de Tema (Claro por defeito / Opção de Escuro)
+        function inicializarTema() {
+            const temaSalvo = localStorage.getItem('futsal_tema') || 'light';
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+            atualizarTextoBotaoTema(temaSalvo);
+        }
 
-        function carregarEscaloesUI() {
-            const grid = document.getElementById('gridEscaloes');
-            grid.innerHTML = '';
-            escaloesLista.forEach(esc => {
-                const div = document.createElement('div');
-                div.className = 'card-escalao';
-                div.onclick = () => selecionarEscalao(esc);
-                div.innerHTML = `
-                    <h3>${esc}</h3>
-                    <p>Gerir plantel e atletas</p>
-                `;
-                grid.appendChild(div);
-            });
+        function alternarTema() {
+            const atual = document.documentElement.getAttribute('data-theme');
+            const novoTema = atual === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', novoTema);
+            localStorage.setItem('futsal_tema', novoTema);
+            atualizarTextoBotaoTema(novoTema);
+        }
+
+        function atualizarTextoBotaoTema(tema) {
+            const texto = tema === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+            document.getElementById('btnTemaLogin').innerText = texto;
+            document.getElementById('btnTemaEscalao').innerText = texto;
+            document.getElementById('btnTemaDashboard').innerText = texto;
+        }
+
+        window.addEventListener('DOMContentLoaded', inicializarTema);
+
+        function fazerLogin() {
+            const user = document.getElementById('userInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+            const erroMsg = document.getElementById('erroLoginMsg');
+
+            const encontrado = utilizadoresPermissoes.find(u => u.utilizador === user && u.palavraPasse === pass);
+
+            if (encontrado) {
+                utilizadorLogado = encontrado;
+                erroMsg.style.display = 'none';
+                document.getElementById('userInput').value = '';
+                document.getElementById('passInput').value = '';
+                
+                document.getElementById('saudacaoUtilizador').innerText = `Bem-vindo, ${utilizadorLogado.nomeCompleto}`;
+                document.getElementById('roleUtilizador').innerText = `Perfil: ${utilizadorLogado.role.toUpperCase()}`;
+
+                carregarEscaloesUI();
+                mudarEcras('escalaoScreen');
+            } else {
+                erroMsg.style.display = 'block';
+            }
+        }
+
+        function voltarLogin() {
+            utilizadorLogado = null;
+            mudarEcras('loginScreen');
         }
 
         function irParaEscaloes() {
             mudarEcras('escalaoScreen');
         }
 
+        function carregarEscaloesUI() {
+            const grid = document.getElementById('gridEscaloes');
+            grid.innerHTML = '';
+
+            escaloesLista.forEach(esc => {
+                const div = document.createElement('div');
+                
+                // Valida acesso para Coordenadores e Gestores de Aplicação
+                const temAcesso = utilizadorLogado.role === 'coordenador' || 
+                                  utilizadorLogado.role === 'Gestor Aplicação' ||
+                                  utilizadorLogado.escaloesPermitidos.includes(esc);
+
+                if (temAcesso) {
+                    div.className = 'card-escalao';
+                    div.onclick = () => selecionarEscalao(esc);
+                    div.innerHTML = `<h3>${esc}</h3><p>Gerir plantel e atletas</p>`;
+                } else {
+                    div.className = 'card-escalao bloqueado';
+                    div.innerHTML = `<h3>${esc}</h3><p style="color: #ef4444;">Sem Acesso</p>`;
+                }
+                grid.appendChild(div);
+            });
+        }
+
         function selecionarEscalao(escalao) {
             escalaoSelecionado = escalao;
             document.getElementById('tituloEscalaoAtual').innerText = `Escalão: ${escalao}`;
+            
+            const btnInserir = document.getElementById('btnInserirAtletaTop');
+            
+            if (utilizadorLogado.role === 'coordenador' || utilizadorLogado.role === 'Gestor Aplicação' || utilizadorLogado.escaloesPermitidos.includes(escalao)) {
+                btnInserir.style.display = 'inline-flex';
+            } else {
+                btnInserir.style.display = 'none';
+            }
+
             mudarEcras('dashboardScreen');
             carregarAtletas();
         }
@@ -412,18 +437,6 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        function abrirModalCriacao() {
-            document.getElementById('atletaForm').reset();
-            document.getElementById('atletaId').value = '';
-            document.getElementById('formTitle').innerText = 'Inserir Novo Atleta';
-            document.getElementById('btnSubmit').innerText = 'Guardar Atleta';
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-
-        function fecharModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
         const getBase64 = (file) => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -431,23 +444,23 @@
             reader.onerror = error => reject(error);
         });
 
+        function toggleFormulario() {
+            const panel = document.getElementById('formPanel');
+            panel.classList.toggle('active');
+        }
+
         async function carregarAtletas() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Erro na resposta da API');
+                if (!response.ok) throw new Error();
                 const todos = await response.json();
-                
-                // Lógica principal: Verifica se o escalão selecionado está presente na string "escaloes" do atleta
-                atletasCache = todos.filter(a => {
-                    if (!a.escaloes) return false;
-                    const listaEscaloes = a.escaloes.split(',').map(e => e.trim());
-                    return listaEscaloes.includes(escalaoSelecionado);
-                });
-
-                renderizarTabela(atletasCache);
+                atletasCache = todos.filter(a => a.escalao === escalaoSelecionado);
+                localStorage.setItem('futsal_atletas_cache', JSON.stringify(atletasCache));
             } catch (error) {
-                console.error('Erro ao carregar atletas:', error);
+                const dadosLocais = localStorage.getItem('futsal_atletas_cache');
+                atletasCache = dadosLocais ? JSON.parse(dadosLocais) : [];
             }
+            renderizarTabela(atletasCache);
         }
 
         function renderizarTabela(atletas) {
@@ -455,32 +468,21 @@
             tbody.innerHTML = '';
 
             if (atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: #777; padding: 25px;">Nenhum atleta registado neste escalão.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 25px;">Nenhum atleta registado neste escalão.</td></tr>`;
                 return;
             }
 
             atletas.forEach(a => {
-                let condFisicaNum = parseInt(String(a.condicaoFisica || "").replace(/[^0-9]/g, '')) || 100;
-                let cansaco = (a.nivelCansaco || "").trim();
-                let precisaAvaliar = (condFisicaNum < 50) || (cansaco === 'Elevado' || cansaco === 'Exausto');
-
                 const tr = document.createElement('tr');
-                if (precisaAvaliar) {
-                    tr.className = 'alerta-atleta';
-                }
-
+                const statusColor = a.status === 'Disponivel' ? '#059669' : '#dc2626';
                 tr.innerHTML = `
-                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:#aaa;">Sem foto</span>'}</td>
-                    <td><span style="color: #007bff; font-weight: bold;">${a.numeroAtleta || '-'}</span></td>
-                    <td>${a.nome || ''}</td>
+                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:var(--text-muted); font-size:0.8rem;">Sem foto</span>'}</td>
+                    <td><span style="color: #d97706; font-weight: bold;">${a.numeroAtleta || ''}</span></td>
+                    <td style="font-weight: 500;">${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
-                    <td><span style="color: #495057; font-weight: bold; font-size: 0.8rem;">${a.escaloes || '-'}</span></td>
-                    <td>${a.idade || '-'}</td>
-                    <td><span style="font-weight: bold; color: ${condFisicaNum < 50 ? '#d9534f' : '#333'};">${a.condicaoFisica || '-'}</span></td>
-                    <td>${a.avaliacao || '-'}</td>
-                    <td><span style="color: ${cansaco === 'Elevado' || cansaco === 'Exausto' ? '#d9534f' : '#28a745'}; font-weight: bold;">${cansaco || '-'}</span></td>
-                    <td><span style="color: ${a.status === 'Disponivel' ? '#28a745' : '#d9534f'}; font-weight: bold;">${a.status || ''}</span></td>
-                    <td>${precisaAvaliar ? `<span class="badge-alerta">⚠️ Avaliar Atleta</span>` : '<span style="color: #28a745; font-size: 0.8rem;">Normal</span>'}</td>
+                    <td>${a.idade || ''}</td>
+                    <td><span style="color: ${statusColor}; font-weight: bold;">${a.status || ''}</span></td>
+                    <td>${a.telemovel || ''}</td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-edit" onclick="prepararEdicao(${a.id})">Editar</button>
@@ -498,8 +500,7 @@
 
             const filtrados = atletasCache.filter(a => {
                 const matchPos = posFiltro === "" || a.posicao === posFiltro;
-                const matchNome = (a.nome || '').toLowerCase().includes(nomeFiltro) || 
-                                  String(a.numeroAtleta || '').includes(nomeFiltro);
+                const matchNome = (a.nome || '').toLowerCase().includes(nomeFiltro);
                 return matchPos && matchNome;
             });
 
@@ -520,19 +521,10 @@
                 if (atletaExistente) fotoBase64 = atletaExistente.fotoBase64;
             }
 
-            const escPrincipal = document.getElementById('escalaoPrincipal').value;
-            const escSecundario = document.getElementById('escalaoSecundario').value;
-            
-            // Combina os escalões separados por vírgula se o secundário estiver preenchido
-            let escaloesCombinados = escPrincipal;
-            if (escSecundario && escSecundario !== "") {
-                escaloesCombinados = `${escPrincipal}, ${escSecundario}`;
-            }
-
             const atleta = {
                 nome: document.getElementById('nome').value,
                 posicao: document.getElementById('posicao').value,
-                escaloes: escaloesCombinados,
+                escalao: escalaoSelecionado,
                 numeroAtleta: parseInt(document.getElementById('numeroAtleta').value) || null,
                 idade: parseInt(document.getElementById('idade').value) || null,
                 altura: parseFloat(document.getElementById('altura').value) || null,
@@ -542,12 +534,7 @@
                 status: document.getElementById('status').value,
                 condicaoFisica: document.getElementById('condicaoFisica').value,
                 encarregadoEducacao: document.getElementById('encarregadoEducacao').value,
-                avaliacao: document.getElementById('avaliacao').value,
-                nivelCansaco: document.getElementById('nivelCansaco').value,
-                descanso: document.getElementById('descanso').value,
-                alimentacao: document.getElementById('alimentacao').value,
-                aproveitamentoEscolar: document.getElementById('aproveitamentoEscolar').value,
-                observacoes: document.getElementById('observacoes').value,
+                telemovelEE: document.getElementById('telemovelEE').value,
                 fotoBase64: fotoBase64
             };
 
@@ -561,7 +548,8 @@
             });
 
             if (response.ok) {
-                fecharModal();
+                limparFormulario();
+                toggleFormulario();
                 carregarAtletas();
             } else {
                 alert('Erro ao guardar o atleta na base de dados.');
@@ -575,14 +563,6 @@
             document.getElementById('atletaId').value = atleta.id;
             document.getElementById('nome').value = atleta.nome || '';
             document.getElementById('posicao').value = atleta.posicao || 'Ala';
-            
-            // Separar os escalões gravados para preencher os selects do formulário
-            if (atleta.escaloes) {
-                const partes = atleta.escaloes.split(',').map(e => e.trim());
-                document.getElementById('escalaoPrincipal').value = partes[0] || 'Petrizes';
-                document.getElementById('escalaoSecundario').value = partes[1] || '';
-            }
-
             document.getElementById('numeroAtleta').value = atleta.numeroAtleta || '';
             document.getElementById('idade').value = atleta.idade || '';
             document.getElementById('altura').value = atleta.altura || '';
@@ -592,17 +572,25 @@
             document.getElementById('status').value = atleta.status || 'Disponivel';
             document.getElementById('condicaoFisica').value = atleta.condicaoFisica || '';
             document.getElementById('encarregadoEducacao').value = atleta.encarregadoEducacao || '';
-            
-            document.getElementById('avaliacao').value = atleta.avaliacao || 'Bom';
-            document.getElementById('nivelCansaco').value = atleta.nivelCansaco || 'Moderado';
-            document.getElementById('descanso').value = atleta.descanso || 'Adequado';
-            document.getElementById('alimentacao').value = atleta.alimentacao || 'Regrada / Saudável';
-            document.getElementById('aproveitamentoEscolar').value = atleta.aproveitamentoEscolar || 'Bom';
-            document.getElementById('observacoes').value = atleta.observacoes || '';
+            document.getElementById('telemovelEE').value = atleta.telemovelEE || '';
 
             document.getElementById('formTitle').innerText = 'Editar Atleta';
             document.getElementById('btnSubmit').innerText = 'Atualizar Atleta';
-            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('btnCancel').style.display = 'block';
+
+            const panel = document.getElementById('formPanel');
+            if (!panel.classList.contains('active')) {
+                panel.classList.add('active');
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('atletaForm').reset();
+            document.getElementById('atletaId').value = '';
+            document.getElementById('formTitle').innerText = 'Inserir Novo Atleta';
+            document.getElementById('btnSubmit').innerText = 'Guardar Atleta';
+            document.getElementById('btnCancel').style.display = 'none';
+            toggleFormulario();
         }
 
         async function eliminarAtleta(id) {
