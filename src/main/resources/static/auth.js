@@ -9,7 +9,7 @@ const utilizadoresPermissoes = [
     },
     {
         utilizador: "AndrePereira",
-        palavraPasse: "Andre1",
+        palavraPasse: "Amanu1",
         nomeCompleto: "André Pereira",
         role: "Gestor Aplicação", // Acede apenas ao escalão definido
         escaloesPermitidos: ["todos"] 
