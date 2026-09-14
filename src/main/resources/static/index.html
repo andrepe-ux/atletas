@@ -87,6 +87,10 @@
         .card-escalao.bloqueado { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; background: var(--bg-panel) !important; transform: none !important; }
         .card-escalao h3 { color: var(--accent-color); margin: 0 0 5px 0; }
         .card-escalao p { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+        
+        .card-db-admin {
+            border: 2px dashed var(--accent-color); background: var(--bg-card);
+        }
 
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
@@ -105,7 +109,6 @@
         }
         .right-panel { width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* MODAL FLUTUANTE PARA INSERIR / EDITAR ATLETA */
         .left-panel {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px);
@@ -118,7 +121,6 @@
             overflow-y: auto; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        /* MODAL FLUTUANTE PARA CONVOCATÓRIA */
         .convocatoria-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px);
@@ -131,7 +133,6 @@
             overflow-y: auto; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        /* MODAL PARA AMPLIAR FOTO */
         .foto-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px);
@@ -220,7 +221,6 @@
         .btn-delete { background-color: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
         .btn-delete:hover { background-color: #dc2626; }
         
-        /* ALERTA DE FADIGA / CONDIÇÃO FÍSICA CRÍTICA */
         .badge-alerta {
             background-color: #fee2e2; color: #dc2626; border: 1px solid #f87171;
             padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.72rem;
@@ -235,7 +235,6 @@
 
         .erro-login { color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: none; }
 
-        /* LOADING COM BOLA DE FUTSAL ANIMADA */
         #loadingOverlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(2px);
@@ -443,7 +442,7 @@
                 <div class="convocatoria-modal" id="convocatoriaModal">
                     <div class="convocatoria-card">
                         <div class="panel-header">
-                            <h3>Gestão de Convocatória de Jogo</h3>
+                            <h3 id="tituloModalConvocatoria">Gestão de Convocatória de Jogo</h3>
                             <button class="btn-secondary" onclick="fecharConvocatoria()" style="padding: 2px 8px;">✕</button>
                         </div>
                         <form id="convocatoriaForm" onsubmit="event.preventDefault(); gerarPdfConvocatoria();">
@@ -472,7 +471,7 @@
                             </div>
 
                             <div style="margin-top: 15px;">
-                                <label style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 5px;">Selecione os Jogadores para a Convocatória:</label>
+                                <label style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 5px;">Selecione os Jogadores do Escalão para a Convocatória:</label>
                                 <div class="table-container" style="max-height: 250px; margin-top: 5px;">
                                     <table>
                                         <thead>
@@ -509,10 +508,10 @@
                 <!-- Painel Principal de Plantel e Listagem Detalhada -->
                 <div class="panel right-panel">
                     <div class="panel-header">
-                        <h3>Plantel Detalhado da Base de Dados</h3>
+                        <h3 id="tituloPainelPlantel">Plantel Detalhado da Base de Dados</h3>
                     </div>
 
-                    <div class="filters-bar">
+                    <div class="filters-bar" id="barraFiltrosPlantel">
                         <div>
                             <label for="filtroPosicao">Filtrar por Posição:</label>
                             <select id="filtroPosicao" autocomplete="off" onchange="filtrarAtletas()">
@@ -582,9 +581,10 @@
         const API_URL = 'http://localhost:8080/api/atletas';
         let atletasCache = [];
         let escalaoSelecionado = '';
+        let modoGestaoDB = false;
 
         const escaloesLista = [
-            "Petrizes", "Traquinas", "Benjamins", "Infantis", 
+            "Petizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
 
@@ -597,7 +597,6 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // Gestão de Tema (Inicia em Modo Claro / Fundo Branco)
         function inicializarTema() {
             const temaSalvo = localStorage.getItem('futsal_tema') || 'light';
             document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -657,6 +656,7 @@
         }
 
         function irParaEscaloes() {
+            modoGestaoDB = false;
             mudarEcras('escalaoScreen');
         }
 
@@ -680,14 +680,40 @@
                 }
                 grid.appendChild(div);
             });
+
+            if (utilizadorLogado && (utilizadorLogado.role === 'Gestor Aplicação' || utilizadorLogado.role === 'coordenador')) {
+                const divDb = document.createElement('div');
+                divDb.className = 'card-escalao card-db-admin';
+                divDb.onclick = () => abrirGestaoBaseDados();
+                divDb.innerHTML = `
+                    <h3>🗄️ Gestão Base de Dados</h3>
+                    <p>Detetar e corrigir erros nos registos globais</p>
+                `;
+                grid.appendChild(divDb);
+            }
         }
 
         function selecionarEscalao(escalao) {
+            modoGestaoDB = false;
             escalaoSelecionado = escalao;
             document.getElementById('tituloEscalaoAtual').innerText = `Escalão: ${escalao}`;
+            document.getElementById('tituloPainelPlantel').innerText = `Plantel do Escalão: ${escalao}`;
+            document.getElementById('barraFiltrosPlantel').style.display = 'flex';
             
             document.getElementById('filtroEscalao').value = escalao;
             document.getElementById('escaloes').value = escalao;
+
+            mudarEcras('dashboardScreen');
+            carregarAtletas();
+        }
+
+        function abrirGestaoBaseDados() {
+            modoGestaoDB = true;
+            escalaoSelecionado = '';
+            document.getElementById('tituloEscalaoAtual').innerText = `Admin: Base de Dados Global`;
+            document.getElementById('tituloPainelPlantel').innerText = `Auditoria e Correção de Erros da Base de Dados`;
+            document.getElementById('barraFiltrosPlantel').style.display = 'flex';
+            document.getElementById('filtroEscalao').value = '';
 
             mudarEcras('dashboardScreen');
             carregarAtletas();
@@ -710,32 +736,22 @@
             panel.classList.toggle('active');
         }
 
-        // FUNÇÕES PARA AMPLIAR FOTO DO ATLETA
-        function ampliarFoto(urlFoto, nomeAtleta) {
-            if (!urlFoto) return;
-            document.getElementById('imgModalAmpliada').src = urlFoto;
-            document.getElementById('modalNomeAtleta').innerText = nomeAtleta;
-            document.getElementById('fotoModal').classList.add('active');
-        }
-
-        function fecharModalFoto() {
-            document.getElementById('fotoModal').classList.remove('active');
-        }
-
-        // MÓDULO DE CONVOCATÓRIA E PESQUISA NO GOOGLE MAPS
         function abrirConvocatoria() {
+            if (modoGestaoDB) {
+                alert('A convocatória deve ser gerida a partir de um escalão específico.');
+                return;
+            }
+
+            document.getElementById('tituloModalConvocatoria').innerText = `Gestão de Convocatória - Escalão: ${escalaoSelecionado}`;
             const tbody = document.getElementById('listaAtletasConvocatoria');
             tbody.innerHTML = '';
 
             const atletasDoEscalao = atletasCache.filter(a => {
-                if (utilizadorLogado && utilizadorLogado.role === 'treinador' && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
-                    return false;
-                }
-                return true;
+                return a.escaloes && a.escaloes.includes(escalaoSelecionado);
             });
 
             if (atletasDoEscalao.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 15px;">Sem atletas disponíveis neste escalão.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 15px;">Sem atletas registados neste escalão.</td></tr>`;
             } else {
                 atletasDoEscalao.forEach(a => {
                     const disponivel = (a.status === 'Disponivel' || a.status === 'Disponível');
@@ -776,6 +792,7 @@
             window.open(urlMaps, '_blank');
         }
 
+        // GERAÇÃO DO PDF DA CONVOCATÓRIA COM FOTOS DOS ATLETAS
         function gerarPdfConvocatoria() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -803,6 +820,7 @@
                 }
             });
 
+            // Cabeçalho do PDF
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(18);
             doc.setTextColor(13, 148, 136);
@@ -810,57 +828,80 @@
 
             doc.setFontSize(11);
             doc.setTextColor(60, 60, 60);
-            doc.text(`Escalão: ${escalaoSelecionado || 'Geral'}`, 14, 28);
+            doc.text(`Escalão: ${escalaoSelecionado}`, 14, 28);
             doc.text(`Adversário: ${adversario}`, 14, 35);
             doc.text(`Data: ${dataJogo} | Hora: ${horaJogo}`, 14, 42);
             doc.text(`Pavilhão: ${pavilhao}`, 14, 49);
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pavilhao)}`;
             doc.setTextColor(2, 132, 199);
-            doc.textWithLink("🔗 Abrir direções no Google Maps", 14, 56, { url: mapsUrl });
+            doc.textWithLink("Abrir direções no Google Maps", 14, 56, { url: mapsUrl });
 
             let yPos = 66;
 
+            // Secção de Convocados
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(13);
             doc.setTextColor(5, 150, 105);
             doc.text(`JOGADORES CONVOCADOS (${convocados.length})`, 14, yPos);
             yPos += 8;
 
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.setTextColor(40, 40, 40);
-
             if (convocados.length === 0) {
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(10);
+                doc.setTextColor(40, 40, 40);
                 doc.text("Nenhum atleta convocado.", 14, yPos);
-                yPos += 8;
+                yPos += 10;
             } else {
                 convocados.forEach((a, index) => {
-                    if (yPos > 280) { doc.addPage(); yPos = 20; }
-                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Cond. Física: ${a.condicaoFisica || '-'}%`, 18, yPos);
-                    yPos += 7;
+                    if (yPos > 265) { doc.addPage(); yPos = 20; }
+
+                    // Adicionar Fotografia se existir
+                    if (a.fotoBase64) {
+                        try {
+                            doc.addImage(a.fotoBase64, 'JPEG', 14, yPos - 5, 10, 10);
+                        } catch (e) {
+                            // Formato alternativo ou falha de imagem
+                        }
+                    }
+
+                    doc.setFont("Helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Cond. Física: ${a.condicaoFisica || '-'}%`, 28, yPos);
+                    yPos += 12;
                 });
             }
 
-            yPos += 10;
+            yPos += 5;
 
-            if (yPos > 260) { doc.addPage(); yPos = 20; }
+            // Secção de Não Convocados / Indisponíveis
+            if (yPos > 250) { doc.addPage(); yPos = 20; }
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(13);
             doc.setTextColor(220, 38, 38);
             doc.text(`JOGADORES NÃO CONVOCADOS / INDISPONÍVEIS (${naoConvocados.length})`, 14, yPos);
             yPos += 8;
 
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.setTextColor(40, 40, 40);
-
             if (naoConvocados.length === 0) {
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(10);
+                doc.setTextColor(40, 40, 40);
                 doc.text("Nenhum atleta nesta categoria.", 14, yPos);
             } else {
                 naoConvocados.forEach((a, index) => {
-                    if (yPos > 280) { doc.addPage(); yPos = 20; }
-                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Status: ${a.status}`, 18, yPos);
-                    yPos += 7;
+                    if (yPos > 265) { doc.addPage(); yPos = 20; }
+
+                    if (a.fotoBase64) {
+                        try {
+                            doc.addImage(a.fotoBase64, 'JPEG', 14, yPos - 5, 10, 10);
+                        } catch (e) {}
+                    }
+
+                    doc.setFont("Helvetica", "normal");
+                    doc.setFontSize(10);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Status: ${a.status}`, 28, yPos);
+                    yPos += 12;
                 });
             }
 
@@ -868,7 +909,17 @@
             fecharConvocatoria();
         }
 
-        // READ: Carregar Atletas diretamente do servidor Spring Boot (Estritamente Online)
+        function ampliarFoto(urlFoto, nomeAtleta) {
+            if (!urlFoto) return;
+            document.getElementById('imgModalAmpliada').src = urlFoto;
+            document.getElementById('modalNomeAtleta').innerText = nomeAtleta;
+            document.getElementById('fotoModal').classList.add('active');
+        }
+
+        function fecharModalFoto() {
+            document.getElementById('fotoModal').classList.remove('active');
+        }
+
         async function carregarAtletas() {
             mostrarLoading('A descarregar dados da base de dados...');
             try {
@@ -883,7 +934,7 @@
                 esconderLoading();
             }
 
-            if (utilizadorLogado && utilizadorLogado.role === 'treinador' && utilizadorLogado.escaloesPermitidos.length > 0) {
+            if (!modoGestaoDB && utilizadorLogado && utilizadorLogado.role === 'treinador' && utilizadorLogado.escaloesPermitidos.length > 0) {
                 document.getElementById('filtroEscalao').value = escalaoSelecionado;
             }
 
@@ -907,7 +958,6 @@
                 const cansaco = (a.nivelCansaco || '').toLowerCase();
                 const temAlerta = condFisicaVal < 60 && (cansaco === 'elevado' || cansaco === 'exausto');
 
-                // Atributo onclick para ampliar a foto se existir
                 const fotoHtml = a.fotoBase64 
                     ? `<img src="${a.fotoBase64}" class="avatar" onclick="ampliarFoto('${a.fotoBase64}', '${a.nome}')" title="Clique para ampliar">` 
                     : '<span style="color:var(--text-muted); font-size:0.8rem;">Sem foto</span>';
@@ -944,8 +994,13 @@
             const idadeFiltro = document.getElementById('filtroIdade').value;
 
             const filtrados = atletasCache.filter(a => {
-                if (utilizadorLogado && utilizadorLogado.role === 'treinador' && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
-                    return false;
+                if (!modoGestaoDB) {
+                    if (utilizadorLogado && utilizadorLogado.role === 'treinador' && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
+                        return false;
+                    }
+                    if (escalaoSelecionado && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
+                        return false;
+                    }
                 }
 
                 const matchPos = posFiltro === "" || a.posicao === posFiltro;
@@ -957,20 +1012,20 @@
             renderizarTabela(filtrados);
         }
 
-        // CREATE & UPDATE (Comunicação Direta com o Backend)
         document.getElementById('atletaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             mostrarLoading('A guardar dados na base de dados...');
 
-            const id = document.getElementById('atletaId').value;
+            const idStr = document.getElementById('atletaId').value;
+            const id = idStr ? parseInt(idStr, 10) : null;
+            
             let fotoBase64 = null;
             const fileInput = document.getElementById('fotoInput').files[0];
             
             if (fileInput) {
                 fotoBase64 = await getBase64(fileInput);
             } else if (id) {
-                const atletaExistente = atletasCache.find(a => a.id == id);
+                const atletaExistente = atletasCache.find(a => a.id === id);
                 if (atletaExistente) fotoBase64 = atletaExistente.fotoBase64;
             }
 

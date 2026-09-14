@@ -2,7 +2,7 @@
 const utilizadoresPermissoes = [
     {
         utilizador: "JoaoOliveira",
-        palavraPasse: "Treinador1",
+        palavraPasse: "JO_Sub19",
         nomeCompleto: "João Oliveira",
         role: "coordenador", // Acede a todos os escalões e gestão total
         escaloesPermitidos: ["todos"] 
@@ -20,7 +20,14 @@ const utilizadoresPermissoes = [
         nomeCompleto: "Carlos Silva",
         role: "treinador",
         escaloesPermitidos: ["Benjamins"] 
-    }
+    },
+	{
+	        utilizador: "MiguelPinho",
+	        palavraPasse: "MP_Sub19",
+	        nomeCompleto: "Miguel Pinho",
+	        role: "coordenador",
+	        escaloesPermitidos: ["todos"] 
+	    }
 ];
 
 // Variável global para guardar a sessão do utilizador atualmente autenticado
