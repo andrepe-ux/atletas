@@ -1,4 +1,4 @@
-package com.futsal.atletas.controller;
+/*package com.futsal.atletas.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,11 +8,11 @@ public class WebController {
 
     @GetMapping("/")
     public String index() {
-        return "index.html";
+        return "forward:/index.html";
     }
 
     @GetMapping("/treinos.html")
     public String treinos() {
-        return "treinos.html";
+        return "forward:/treinos.html";
     }
-}
+}*/
