@@ -338,14 +338,14 @@
                                         <option value="Fixo">Fixo</option>
                                         <option value="Ala">Ala</option>
                                         <option value="Pívot">Pívot</option>
-										<option value="Universal">Universal</option>
+                                        <option value="Universal">Universal</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label for="escalaoPrincipal">Escalão Principal:</label>
                                     <select id="escalaoPrincipal" autocomplete="off" required>
                                         <option value="">Selecione...</option>
-                                        <option value="Petizes">Petizes</option>
+                                        <option value="Petrizes">Petrizes</option>
                                         <option value="Traquinas">Traquinas</option>
                                         <option value="Benjamins">Benjamins</option>
                                         <option value="Infantis">Infantis</option>
@@ -359,10 +359,10 @@
 
                             <div class="form-row">
                                 <div>
-                                    <label for="escalaoSecundario">Escalão Secundário (Opcional):</label>
+                                    <label for="escalaoSecundario">Escalão Secundario (Opcional):</label>
                                     <select id="escalaoSecundario" autocomplete="off">
                                         <option value="">Nenhum</option>
-                                        <option value="Petizes">Petizes</option>
+                                        <option value="Petrizes">Petrizes</option>
                                         <option value="Traquinas">Traquinas</option>
                                         <option value="Benjamins">Benjamins</option>
                                         <option value="Infantis">Infantis</option>
@@ -499,7 +499,7 @@
                             </div>
 
                             <div style="margin-top: 15px;">
-                                <label style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 5px;">Selecione os Jogadores (Principal ou Secundário) para a Convocatória:</label>
+                                <label style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 5px;">Selecione os Jogadores do Escalão para a Convocatória:</label>
                                 <div class="table-container" style="max-height: 250px; margin-top: 5px;">
                                     <table>
                                         <thead>
@@ -548,14 +548,14 @@
                                 <option value="Fixo">Fixo</option>
                                 <option value="Ala">Ala</option>
                                 <option value="Pívot">Pívot</option>
-								<option value="Universal">Universal</option>
+                                <option value="Universal">Universal</option>
                             </select>
                         </div>
                         <div>
                             <label for="filtroEscalao">Filtrar por Escalão:</label>
                             <select id="filtroEscalao" autocomplete="off" onchange="filtrarAtletas()">
                                 <option value="">Todos</option>
-                                <option value="Petizes">Petizes</option>
+                                <option value="Petrizes">Petrizes</option>
                                 <option value="Traquinas">Traquinas</option>
                                 <option value="Benjamins">Benjamins</option>
                                 <option value="Infantis">Infantis</option>
@@ -585,8 +585,7 @@
                                     <th>Nº</th>
                                     <th>Nome</th>
                                     <th>Posição</th>
-                                    <th>Escalão Principal</th>
-                                    <th>Escalão Secundário</th>
+                                    <th>Escalões (Principal / Secundário)</th>
                                     <th>Idade</th>
                                     <th>Status / Alerta</th>
                                     <th>Cond. Física</th>
@@ -614,7 +613,7 @@
         let modoGestaoDB = false;
 
         const escaloesLista = [
-            "Petizes", "Traquinas", "Benjamins", "Infantis", 
+            "Petrizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
 
@@ -732,6 +731,7 @@
             
             document.getElementById('filtroEscalao').value = escalao;
             document.getElementById('escalaoPrincipal').value = escalao;
+            document.getElementById('escalaoSecundario').value = '';
 
             mudarEcras('dashboardScreen');
             carregarAtletas();
@@ -776,9 +776,8 @@
             const tbody = document.getElementById('listaAtletasConvocatoria');
             tbody.innerHTML = '';
 
-            // Considera o atleta se pertencer ao escalão como Principal ou Secundário
             const atletasDoEscalao = atletasCache.filter(a => {
-                return (a.escalaoPrincipal === escalaoSelecionado) || (a.escalaoSecundario === escalaoSelecionado);
+                return a.escaloes && a.escaloes.includes(escalaoSelecionado);
             });
 
             if (atletasDoEscalao.length === 0) {
@@ -970,7 +969,7 @@
             tbody.innerHTML = '';
 
             if (!atletas || atletas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum atleta encontrado na base de dados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhum atleta encontrado na base de dados.</td></tr>`;
                 return;
             }
 
@@ -991,8 +990,7 @@
                     <td><span style="color: #d97706; font-weight: bold;">${a.numeroAtleta || ''}</span></td>
                     <td style="font-weight: 600;">${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>
-                    <td><span style="font-weight: bold; color: var(--accent-color);">${a.escalaoPrincipal || ''}</span></td>
-                    <td>${a.escalaoSecundario || '<span style="color:var(--text-muted)">-</span>'}</td>
+                    <td>${a.escaloes || ''}</td>
                     <td>${a.idade || ''}</td>
                     <td>
                         <span style="color: ${statusColor}; font-weight: bold;">${a.status || ''}</span>
@@ -1020,18 +1018,16 @@
 
             const filtrados = atletasCache.filter(a => {
                 if (!modoGestaoDB) {
-                    if (utilizadorLogado && utilizadorLogado.role === 'treinador') {
-                        const pertRazao = (a.escalaoPrincipal === escalaoSelecionado || a.escalaoSecundario === escalaoSelecionado);
-                        if (!pertRazao) return false;
+                    if (utilizadorLogado && utilizadorLogado.role === 'treinador' && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
+                        return false;
                     }
-                    if (escalaoSelecionado) {
-                        const pertRazaoEsc = (a.escalaoPrincipal === escalaoSelecionado || a.escalaoSecundario === escalaoSelecionado);
-                        if (!pertRazaoEsc) return false;
+                    if (escalaoSelecionado && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
+                        return false;
                     }
                 }
 
                 const matchPos = posFiltro === "" || a.posicao === posFiltro;
-                const matchEsc = escFiltro === "" || (a.escalaoPrincipal === escFiltro || a.escalaoSecundario === escFiltro);
+                const matchEsc = escFiltro === "" || (a.escaloes && a.escaloes.includes(escFiltro));
                 const matchIdade = idadeFiltro === "" || String(a.idade) === String(idadeFiltro);
                 return matchPos && matchEsc && matchIdade;
             });
@@ -1056,11 +1052,18 @@
                 if (atletaExistente) fotoBase64 = atletaExistente.fotoBase64;
             }
 
+            // Combina o escalão principal e secundário para o campo único 'escaloes' esperado pelo backend
+            const escPrincipal = document.getElementById('escalaoPrincipal').value;
+            const escSecundario = document.getElementById('escalaoSecundario').value;
+            let stringEscaloes = escPrincipal;
+            if (escSecundario) {
+                stringEscaloes += `, ${escSecundario}`;
+            }
+
             const atleta = {
                 nome: document.getElementById('nome').value,
                 posicao: document.getElementById('posicao').value,
-                escalaoPrincipal: document.getElementById('escalaoPrincipal').value,
-                escalaoSecundario: document.getElementById('escalaoSecundario').value,
+                escaloes: stringEscaloes,
                 numeroAtleta: parseInt(document.getElementById('numeroAtleta').value) || null,
                 idade: parseInt(document.getElementById('idade').value) || null,
                 altura: parseFloat(document.getElementById('altura').value) || null,
@@ -1111,8 +1114,17 @@
             document.getElementById('atletaId').value = atleta.id;
             document.getElementById('nome').value = atleta.nome || '';
             document.getElementById('posicao').value = atleta.posicao || 'Ala';
-            document.getElementById('escalaoPrincipal').value = atleta.escalaoPrincipal || '';
-            document.getElementById('escalaoSecundario').value = atleta.escalaoSecundario || '';
+            
+            // Tenta separar os escalões guardados na string para preencher Principal e Secundário
+            if (atleta.escaloes) {
+                const partes = atleta.escaloes.split(',').map(s => s.trim());
+                document.getElementById('escalaoPrincipal').value = partes[0] || '';
+                document.getElementById('escalaoSecundario').value = partes[1] || '';
+            } else {
+                document.getElementById('escalaoPrincipal').value = '';
+                document.getElementById('escalaoSecundario').value = '';
+            }
+
             document.getElementById('numeroAtleta').value = atleta.numeroAtleta || '';
             document.getElementById('idade').value = atleta.idade || '';
             document.getElementById('altura').value = atleta.altura || '';
