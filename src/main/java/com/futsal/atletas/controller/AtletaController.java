@@ -47,6 +47,7 @@ public class AtletaController {
             atleta.setEscaloes(atletaDetalhes.getEscaloes());
             atleta.setNumeroAtleta(atletaDetalhes.getNumeroAtleta());
             atleta.setIdade(atletaDetalhes.getIdade());
+            atleta.setDataNascimento(atletaDetalhes.getDataNascimento());
             atleta.setAltura(atletaDetalhes.getAltura());
             atleta.setPeso(atletaDetalhes.getPeso());
             atleta.setTelemovel(atletaDetalhes.getTelemovel());

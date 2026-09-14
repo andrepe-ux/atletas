@@ -1,6 +1,7 @@
 package com.futsal.atletas.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "atletas")
@@ -13,11 +14,15 @@ public class Atleta {
     private String nome;
     private String posicao;
     
-    // Substituído ou adaptado para múltiplos escalões (ex: "Juniores, Seniores")
+    // Suporte a múltiplos escalões (ex: "Juniores, Seniores")
     private String escaloes; 
 
     private Integer numeroAtleta;
     private Integer idade;
+    
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
+    
     private Double altura;
     private Double peso;
     private String telemovel;
@@ -59,6 +64,9 @@ public class Atleta {
 
     public Integer getIdade() { return idade; }
     public void setIdade(Integer idade) { this.idade = idade; }
+
+    public LocalDate getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
 
     public Double getAltura() { return altura; }
     public void setAltura(Double altura) { this.altura = altura; }
