@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futsal PRO - Plano e Registo de Treinos</title>
+    <!-- Biblioteca de Ícones FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF e AutoTable para exportação de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- html2canvas para capturar a quadra exata para o PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #ffffff;
+            --bg-scaler: #ffffff;
+            --bg-panel: #ffffff;
+            --bg-card: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --accent-color: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --table-header-bg: #e9ecef;
+            --table-row-even: #f8f9fa;
+            --table-row-hover: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --input-text: #212529;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --bg-scaler: #181818;
+            --bg-panel: #1a1a1a;
+            --bg-card: #222222;
+            --border-color: #333333;
+            --text-color: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --accent-color: #a78bfa;
+            --accent-hover: #8b5cf6;
+            --table-header-bg: #1a1a1a;
+            --table-row-even: #151515;
+            --table-row-hover: #222222;
+            --input-bg: #252525;
+            --input-border: #444444;
+            --input-text: #ffffff;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-body); color: var(--text-color);
+            font-family: Arial, sans-serif;
+            width: 100vw; height: 100vh; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #app-scaler {
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; position: relative;
+            background: var(--bg-scaler); overflow: hidden;
+        }
+
+        .top-nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 12px 20px;
+            flex-shrink: 0; z-index: 2;
+        }
+
+        .main-layout {
+            display: flex; flex: 1; gap: 12px; padding: 12px; box-sizing: border-box; overflow: hidden;
+        }
+
+        /* COLUNA LATERAL ESQUERDA AMPLIADA PARA CONFIG + ATLETAS */
+        .left-config-panel {
+            width: 320px; background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); flex-shrink: 0;
+        }
+
+        .center-pitch-panel {
+            flex: 1; background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 4px;
+        }
+        .panel-header h3 { margin: 0; color: var(--accent-color); font-size: 0.95rem; }
+
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; font-weight: bold; }
+        input, select, textarea {
+            width: 100%; padding: 6px 8px; background-color: var(--input-bg);
+            border: 1px solid var(--input-border); border-radius: 5px; color: var(--input-text); font-size: 0.8rem; box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; }
+
+        /* GRID EM 4 QUADRAS ESPAÇOSAS */
+        .quadras-grid-container {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 5px;
+        }
+        .quadra-card-item {
+            background: #0f172a; border: 2px solid var(--accent-color); border-radius: 8px; padding: 10px; position: relative;
+        }
+        .pitch-canvas-wrapper {
+            width: 100%; aspect-ratio: 40 / 20; background: #1e3a8a;
+            border: 2px solid #ffffff; border-radius: 4px; position: relative;
+            margin: 6px 0; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); overflow: hidden; cursor: crosshair;
+        }
+        .pitch-bg-markup {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+        }
+        .pitch-center-circle {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 15%; height: 30%; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%;
+        }
+        .pitch-center-line {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 100%; background: rgba(255,255,255,0.7);
+        }
+        .pitch-goal-left {
+            position: absolute; top: 25%; left: 0; width: 8%; height: 50%;
+            border: 2px solid rgba(255,255,255,0.8); border-left: none; border-radius: 0 15px 15px 0;
+        }
+        .pitch-goal-right {
+            position: absolute; top: 25%; right: 0; width: 8%; height: 50%;
+            border: 2px solid rgba(255,255,255,0.8); border-right: none; border-radius: 15px 0 0 15px;
+        }
+
+        .pitch-svg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;
+        }
+
+        /* ÍCONES E ELEMENTOS TÁTICOS */
+        .tactical-marker {
+            position: absolute; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: grab; transform: translate(-50%, -50%);
+            user-select: none; z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .tactical-marker:active { cursor: grabbing; }
+
+        .marker-player { width: 28px; height: 28px; background-color: #38bdf8; color: #fff; border-radius: 50%; border: 2px solid #0284c7; font-size: 0.75rem; }
+        .marker-atleta-box { padding: 3px 6px; background-color: #1e293b; color: #38bdf8; border: 1px solid #38bdf8; border-radius: 4px; font-size: 0.7rem; font-weight: bold; white-space: nowrap; }
+        .marker-cone { width: 24px; height: 24px; background-color: #f97316; color: #fff; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); border: none; font-size: 0.6rem; }
+        .marker-bola { width: 20px; height: 20px; background-color: #ffffff; color: #000; border-radius: 50%; border: 2px solid #111; font-size: 0.65rem; }
+        .marker-minibaliza { width: 30px; height: 20px; background-color: #ef4444; color: #fff; border-radius: 3px; border: 2px solid #b91c1c; font-size: 0.6rem; }
+        .marker-barreira { width: 34px; height: 16px; background-color: #64748b; color: #fff; border-radius: 3px; border: 2px solid #475569; font-size: 0.6rem; }
+
+        .table-container { 
+            max-height: 220px; overflow-y: auto; overflow-x: auto; 
+            border: 1px solid var(--border-color); border-radius: 6px; 
+            background: var(--bg-panel); color: var(--text-color); margin-top: 4px;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 220px; text-align: left; }
+        th, td { border-bottom: 1px solid var(--border-color); padding: 4px 6px; font-size: 0.72rem; vertical-align: middle; }
+        th { background-color: var(--table-header-bg); color: var(--text-color); position: sticky; top: 0; z-index: 2; font-weight: bold; }
+        tbody tr:nth-child(even) { background-color: var(--table-row-even); }
+        tbody tr:hover { background-color: var(--table-row-hover); }
+
+        .btn-secondary {
+            background-color: var(--bg-card); color: var(--text-color); border: 1px solid var(--border-color);
+            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.75rem;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn-secondary:hover { background-color: var(--border-color); }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div id="app-scaler">
+        <div class="top-nav-bar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn-secondary" onclick="voltarIndex()">⬅ Voltar ao Plantel</button>
+                <h3 id="tituloSecaoTreino" style="margin: 0; color: var(--accent-color); font-size: 1.05rem;">Gestão de Treinos</h3>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-secondary" onclick="exportarTreinoPdf()" style="background-color: #ef4444; color: white;"><i class="fa-solid fa-file-pdf"></i> PDF Tático</button>
+                <button class="btn-secondary" onclick="exportarTreinoJson()" style="background-color: #059669; color: white;"><i class="fa-solid fa-download"></i> Guardar Sessão</button>
+                <input type="file" id="inputCarregarJson" style="display: none;" accept=".json" onchange="recuperarTreinoJson(event)">
+                <button class="btn-secondary" onclick="document.getElementById('inputCarregarJson').click()" style="background-color: #2563eb; color: white;"><i class="fa-solid fa-upload"></i> Recuperar Sessão</button>
+                <button class="btn-secondary" onclick="alternarTema()">🌙 Tema</button>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- 1. BARRA LATERAL ESQUERDA (CONFIGURAÇÃO + ATLETAS) -->
+            <div class="left-config-panel">
+                <div class="panel-header">
+                    <h3>⚙️ Configuração do Treino</h3>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div>
+                        <label for="dataTreino">Data:</label>
+                        <input type="date" id="dataTreino" required>
+                    </div>
+                    <div>
+                        <label for="horaTreino">Horas:</label>
+                        <input type="time" id="horaTreino" value="19:00">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="localTreino">Localização:</label>
+                    <input type="text" id="localTreino" placeholder="Ex: Pavilhão Municipal...">
+                </div>
+
+                <div>
+                    <label for="observacoesTreino">Notas Gerais:</label>
+                    <textarea id="observacoesTreino" rows="2" placeholder="Observações finais..."></textarea>
+                </div>
+
+                <!-- SEÇÃO DE ATLETAS NA LATERAL ESQUERDA -->
+                <div class="panel-header" style="margin-top: 6px;">
+                    <h3>👥 Atletas (<span id="contadorAtletas">0</span>)</h3>
+                    <input type="checkbox" id="selectAllPresenca" onclick="togglePresencaAll(this)" checked title="Selecionar Todos">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 18px; text-align: center;">✓</th>
+                                <th>Nome</th>
+                                <th style="width: 55px;">Pres.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAtletasTreino">
+                            <!-- Preenchido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. PRANCHETA TÁTICA (4 QUADRAS ESPAÇOSAS) -->
+            <div class="center-pitch-panel">
+                <div class="panel-header">
+                    <h3>⚽ Prancheta Tática (4 Possibilidades / Exercícios)</h3>
+                </div>
+
+                <div class="quadras-grid-container" id="quadrasContainer">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/atletas';
+        let atletasEscalao = [];
+        let quadrasExercicios = [];
+        let escalaoAtual = localStorage.getItem('futsal_escalao_atual') || 'Seniores';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tituloSecaoTreino').innerText = `Treinos - Escalão: ${escalaoAtual}`;
+            document.getElementById('dataTreino').valueAsDate = new Date();
+            carregarAtletasTreino().then(() => {
+                inicializarTemaTreino();
+                inicializarQuatroQuadras();
+            });
+        });
+
+        function inicializarTemaTreino() {
+            const temaSalvo = localStorage.getItem('futsal_tema') || 'light';
+            document.body.setAttribute('data-theme', temaSalvo);
+        }
+
+        function alternarTema() {
+            const atual = document.body.getAttribute('data-theme');
+            const novoTema = atual === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', novoTema);
+            localStorage.setItem('futsal_tema', novoTema);
+        }
+
+		function voltarIndex() {
+		            window.history.back();
+		        }
+
+        function inicializarQuatroQuadras() {
+            quadrasExercicios = [];
+            for (let i = 0; i < 4; i++) {
+                quadrasExercicios.push({
+                    id: Date.now() + i,
+                    tipoTreino: 'Tático',
+                    descricao: '',
+                    explicacaoLivre: '',
+                    ferramentaAtual: 'jogador',
+                    atletaSelecionadoId: '',
+                    marcadores: [],
+                    trajetosLivres: [],
+                    isDrawing: false,
+                    currentPathPoints: []
+                });
+            }
+            renderizarQuadras();
+        }
+
+        function criarNovoExercicio(idx) {
+            quadrasExercicios[idx] = {
+                id: Date.now(),
+                tipoTreino: 'Tático',
+                descricao: '',
+                explicacaoLivre: '',
+                ferramentaAtual: 'jogador',
+                atletaSelecionadoId: '',
+                marcadores: [],
+                trajetosLivres: [],
+                isDrawing: false,
+                currentPathPoints: []
+            };
+            renderizarQuadras();
+        }
+
+        function recuperarExercicioJson(event, idx) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const exercicioCarregado = JSON.parse(e.target.result);
+                    quadrasExercicios[idx] = {
+                        id: exercicioCarregado.id || Date.now(),
+                        tipoTreino: exercicioCarregado.tipoTreino || 'Tático',
+                        descricao: exercicioCarregado.descricao || '',
+                        explicacaoLivre: exercicioCarregado.explicacaoLivre || '',
+                        ferramentaAtual: 'jogador',
+                        atletaSelecionadoId: '',
+                        marcadores: exercicioCarregado.marcadores || [],
+                        trajetosLivres: exercicioCarregado.trajetosLivres || [],
+                        isDrawing: false,
+                        currentPathPoints: []
+                    };
+                    renderizarQuadras();
+                } catch (err) {
+                    alert('Erro ao ler o ficheiro JSON do exercício.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function exportarExercicioIndividualJson(idx) {
+            const q = quadrasExercicios[idx];
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(q, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Exercicio_${q.tipoTreino}_${idx + 1}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function renderizarQuadras() {
+            const container = document.getElementById('quadrasContainer');
+            container.innerHTML = '';
+
+            quadrasExercicios.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'quadra-card-item';
+                
+                let optionsAtletas = '<option value="">-- Inserir Atleta --</option>';
+                atletasEscalao.forEach(a => {
+                    optionsAtletas += `<option value="${a.id}">[${a.numeroAtleta || '-'}] ${a.nome}</option>`;
+                });
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.78rem; font-weight: bold; color: #38bdf8;">Exercício #${idx + 1}</span>
+                        <div style="display: flex; gap: 4px;">
+                            <input type="file" id="inputJsonEx_${idx}" style="display:none;" accept=".json" onchange="recuperarExercicioJson(event, ${idx})">
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('inputJsonEx_${idx}').click()" style="padding: 1px 4px; font-size: 0.65rem;" title="Recuperar">📁</button>
+                            <button type="button" class="btn-secondary" onclick="exportarExercicioIndividualJson(${idx})" style="padding: 1px 4px; font-size: 0.65rem;" title="Guardar">💾</button>
+                            <button type="button" class="btn-secondary" onclick="criarNovoExercicio(${idx})" style="padding: 1px 4px; font-size: 0.65rem; background:#dc2626; color:white;" title="Novo">✨</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 4px;">
+                        <label>Tipo de Treino:</label>
+                        <select onchange="quadrasExercicios[${idx}].tipoTreino = this.value" style="font-size: 0.7rem; padding: 3px;">
+                            <option value="Força" ${q.tipoTreino==='Força'?'selected':''}>Força</option>
+                            <option value="Velocidade" ${q.tipoTreino==='Velocidade'?'selected':''}>Velocidade</option>
+                            <option value="Tático" ${q.tipoTreino==='Tático'?'selected':''}>Tático</option>
+                            <option value="Guarda-Redes" ${q.tipoTreino==='Guarda-Redes'?'selected':''}>Guarda-Redes</option>
+                        </select>
+                    </div>
+
+                    <input type="text" placeholder="Nome do Exercício..." value="${q.descricao}" oninput="quadrasExercicios[${idx}].descricao = this.value" style="margin-bottom: 4px; padding: 4px 6px;">
+
+                    <div class="pitch-canvas-wrapper" id="wrapper_${idx}" 
+                         onmousedown="iniciarAcaoCanvas(event, ${idx})" 
+                         onmousemove="moverAcaoCanvas(event, ${idx})" 
+                         onmouseup="pararAcaoCanvas(${idx})">
+                        <div class="pitch-bg-markup">
+                            <div class="pitch-center-line"></div>
+                            <div class="pitch-center-circle"></div>
+                            <div class="pitch-goal-left"></div>
+                            <div class="pitch-goal-right"></div>
+                        </div>
+                        <svg class="pitch-svg-overlay" id="svgCanvas_${idx}" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <defs>
+                                <marker id="arrowhead_${idx}" markerWidth="5" markerHeight="4" refX="3.5" refY="2" orient="auto">
+                                    <polygon points="0 0, 5 2, 0 4" fill="#facc15"/>
+                                </marker>
+                            </defs>
+                            <g id="svgGroup_${idx}"></g>
+                        </svg>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 4px;">
+                        <select id="ferramenta_${idx}" onchange="quadrasExercicios[${idx}].ferramentaAtual = this.value" style="width: auto; padding: 2px; font-size: 0.68rem;">
+                            <option value="jogador" ${q.ferramentaAtual==='jogador'?'selected':''}>Jogador 🔵</option>
+                            <option value="atleta-box" ${q.ferramentaAtual==='atleta-box'?'selected':''}>Caixa Atleta 🔲</option>
+                            <option value="cone" ${q.ferramentaAtual==='cone'?'selected':''}>Cone 🟧</option>
+                            <option value="bola" ${q.ferramentaAtual==='bola'?'selected':''}>Bola ⚪</option>
+                            <option value="minibaliza" ${q.ferramentaAtual==='minibaliza'?'selected':''}>Mini-Baliza 🥅</option>
+                            <option value="barreira" ${q.ferramentaAtual==='barreira'?'selected':''}>Barreira 🧱</option>
+                            <option value="movimento-livre" ${q.ferramentaAtual==='movimento-livre'?'selected':''}>Desenhar Seta ✍️</option>
+                            <option value="linha-reta" ${q.ferramentaAtual==='linha-reta'?'selected':''}>Linha Reta 📏</option>
+                        </select>
+
+                        <select id="atleta_select_${idx}" onchange="quadrasExercicios[${idx}].atletaSelecionadoId = this.value" style="flex: 1; padding: 2px; font-size: 0.68rem;">
+                            ${optionsAtletas}
+                        </select>
+
+                        <button type="button" class="btn-secondary" onclick="limparTudoQuadra(${idx})" style="padding: 2px 5px; font-size: 0.65rem; background: #dc2626; color: white;">Limpar</button>
+                    </div>
+
+                    <div>
+                        <textarea rows="2" placeholder="Explicação detalhada do exercício..." oninput="quadrasExercicios[${idx}].explicacaoLivre = this.value" style="font-size: 0.75rem; padding: 4px 6px;">${q.explicacaoLivre}</textarea>
+                    </div>
+                `;
+
+                container.appendChild(card);
+                renderizarElementosQuadra(idx);
+            });
+        }
+
+        function obterCoordsRelativas(event, wrapperId) {
+            const wrapper = document.getElementById(wrapperId);
+            const rect = wrapper.getBoundingClientRect();
+            return {
+                x: ((event.clientX - rect.left) / rect.width) * 100,
+                y: ((event.clientY - rect.top) / rect.height) * 100
+            };
+        }
+
+        function iniciarAcaoCanvas(event, idx) {
+            if (event.target.classList.contains('tactical-marker') || event.target.closest('.tactical-marker')) return;
+
+            const q = quadrasExercicios[idx];
+            const coords = obterCoordsRelativas(event, `wrapper_${idx}`);
+
+            if (q.ferramentaAtual === 'movimento-livre' || q.ferramentaAtual === 'linha-reta') {
+                q.isDrawing = true;
+                q.currentPathPoints = [[coords.x, coords.y]];
+            } else {
+                let nomeAtletaTexto = '';
+                if (q.ferramentaAtual === 'atleta-box') {
+                    if (!q.atletaSelecionadoId) {
+                        alert('Selecione primeiro um atleta na lista ao lado da ferramenta.');
+                        return;
+                    }
+                    const atletaObj = atletasEscalao.find(a => a.id == q.atletaSelecionadoId);
+                    nomeAtletaTexto = atletaObj ? atletaObj.nome : 'Atleta';
+                }
+
+                q.marcadores.push({
+                    tipo: q.ferramentaAtual,
+                    x: coords.x,
+                    y: coords.y,
+                    texto: nomeAtletaTexto,
+                    id: Date.now()
+                });
+                renderizarElementosQuadra(idx);
+            }
+        }
+
+        function moverAcaoCanvas(event, idx) {
+            const q = quadrasExercicios[idx];
+            if (!q.isDrawing) return;
+
+            const coords = obterCoordsRelativas(event, `wrapper_${idx}`);
+            if (q.ferramentaAtual === 'linha-reta') {
+                q.currentPathPoints = [q.currentPathPoints[0], [coords.x, coords.y]];
+            } else {
+                q.currentPathPoints.push([coords.x, coords.y]);
+            }
+            renderizarElementosQuadra(idx);
+        }
+
+        function pararAcaoCanvas(idx) {
+            const q = quadrasExercicios[idx];
+            if (q.isDrawing) {
+                q.isDrawing = false;
+                if (q.currentPathPoints.length > 1) {
+                    q.trajetosLivres.push({
+                        tipo: q.ferramentaAtual,
+                        pontos: [...q.currentPathPoints],
+                        id: Date.now()
+                    });
+                }
+                q.currentPathPoints = [];
+                renderizarElementosQuadra(idx);
+            }
+        }
+
+        function renderizarElementosQuadra(idx) {
+            const wrapper = document.getElementById(`wrapper_${idx}`);
+            if (!wrapper) return;
+
+            wrapper.querySelectorAll('.tactical-marker').forEach(m => m.remove());
+            const svgGroup = document.getElementById(`svgGroup_${idx}`);
+            if (svgGroup) svgGroup.innerHTML = '';
+
+            const q = quadrasExercicios[idx];
+            let playerCounter = 1;
+
+            q.marcadores.forEach((m) => {
+                const el = document.createElement('div');
+                el.style.left = m.x + '%';
+                el.style.top = m.y + '%';
+
+                if (m.tipo === 'jogador') {
+                    el.className = 'tactical-marker marker-player';
+                    el.innerText = playerCounter++;
+                } else if (m.tipo === 'atleta-box') {
+                    el.className = 'tactical-marker marker-atleta-box';
+                    el.innerText = m.texto;
+                } else if (m.tipo === 'cone') {
+                    el.className = 'tactical-marker marker-cone';
+                } else if (m.tipo === 'bola') {
+                    el.className = 'tactical-marker marker-bola';
+                } else if (m.tipo === 'minibaliza') {
+                    el.className = 'tactical-marker marker-minibaliza';
+                    el.innerHTML = '<i class="fa-solid fa-futbol" style="font-size:0.55rem;"></i>';
+                } else if (m.tipo === 'barreira') {
+                    el.className = 'tactical-marker marker-barreira';
+                }
+
+                el.onmousedown = (e) => {
+                    e.stopPropagation();
+                    const onMouseMove = (moveEvent) => {
+                        const coords = obterCoordsRelativas(moveEvent, `wrapper_${idx}`);
+                        m.x = Math.max(2, Math.min(98, coords.x));
+                        m.y = Math.max(2, Math.min(98, coords.y));
+                        renderizarElementosQuadra(idx);
+                    };
+                    const onMouseUp = () => {
+                        window.removeEventListener('mousemove', onMouseMove);
+                        window.removeEventListener('mouseup', onMouseUp);
+                    };
+                    window.addEventListener('mousemove', onMouseMove);
+                    window.addEventListener('mouseup', onMouseUp);
+                };
+
+                el.ondblclick = (e) => {
+                    e.stopPropagation();
+                    q.marcadores = q.marcadores.filter(item => item.id !== m.id);
+                    renderizarElementosQuadra(idx);
+                };
+
+                wrapper.appendChild(el);
+            });
+
+            const gerarCaminhoSvg = (pontos) => {
+                if (!pontos || pontos.length < 2) return '';
+                let d = `M ${pontos[0][0]} ${pontos[0][1]}`;
+                for (let i = 1; i < pontos.length; i++) {
+                    d += ` L ${pontos[i][0]} ${pontos[i][1]}`;
+                }
+                return d;
+            };
+
+            q.trajetosLivres.forEach((item) => {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', gerarCaminhoSvg(item.pontos));
+                path.setAttribute('stroke', '#facc15');
+                path.setAttribute('stroke-width', '1.2');
+                path.setAttribute('fill', 'none');
+                
+                if (item.tipo === 'linha-reta') {
+                    path.setAttribute('stroke-dasharray', 'none');
+                } else {
+                    path.setAttribute('stroke-dasharray', '2.5,2.5');
+                    path.setAttribute('marker-end', `url(#arrowhead_${idx})`);
+                }
+                svgGroup.appendChild(path);
+            });
+
+            if (q.isDrawing && q.currentPathPoints.length > 1) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', gerarCaminhoSvg(q.currentPathPoints));
+                path.setAttribute('stroke', '#facc15');
+                path.setAttribute('stroke-width', '1.2');
+                path.setAttribute('fill', 'none');
+
+                if (q.ferramentaAtual === 'linha-reta') {
+                    path.setAttribute('stroke-dasharray', 'none');
+                } else {
+                    path.setAttribute('stroke-dasharray', '2.5,2.5');
+                    path.setAttribute('marker-end', `url(#arrowhead_${idx})`);
+                }
+                svgGroup.appendChild(path);
+            }
+        }
+
+        function limparTudoQuadra(idx) {
+            quadrasExercicios[idx].marcadores = [];
+            quadrasExercicios[idx].trajetosLivres = [];
+            renderizarElementosQuadra(idx);
+        }
+
+        async function carregarAtletasTreino() {
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    const todos = await response.json();
+                    atletasEscalao = todos.filter(a => a.escaloes && a.escaloes.includes(escalaoAtual));
+                    renderizarTabelaTreino(atletasEscalao);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar atletas:', e);
+            }
+        }
+
+        function renderizarTabelaTreino(atletas) {
+            const tbody = document.getElementById('tabelaAtletasTreino');
+            tbody.innerHTML = '';
+            document.getElementById('contadorAtletas').innerText = atletas.length;
+
+            if (atletas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 8px;">Sem atletas.</td></tr>`;
+                return;
+            }
+
+            atletas.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="chk-presenca" value="${a.id}" checked>
+                    </td>
+                    <td><strong>[${a.numeroAtleta || '-'}]</strong> ${a.nome}</td>
+                    <td>
+                        <select class="status-individual" data-id="${a.id}" style="padding: 1px; font-size: 0.68rem;">
+                            <option value="Presente">Pres.</option>
+                            <option value="Limitado">Limit.</option>
+                            <option value="Ausente">Ausente</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function togglePresencaAll(source) {
+            document.querySelectorAll('.chk-presenca').forEach(cb => cb.checked = source.checked);
+        }
+
+        function recolherDadosSessao() {
+            const dataTreino = document.getElementById('dataTreino').value;
+            const horaTreino = document.getElementById('horaTreino').value;
+            const localTreino = document.getElementById('localTreino').value;
+            const observacoes = document.getElementById('observacoesTreino').value;
+
+            const registoAtletas = [];
+            document.querySelectorAll('.chk-presenca').forEach(cb => {
+                const atletaId = cb.value;
+                const presente = cb.checked;
+                const selectIndividual = document.querySelector(`.status-individual[data-id="${atletaId}"]`);
+                const estado = selectIndividual ? selectIndividual.value : 'Presente';
+
+                const atletaObj = atletasEscalao.find(a => a.id == atletaId);
+                if (atletaObj) {
+                    registoAtletas.push({
+                        id: atletaObj.id,
+                        nome: atletaObj.nome,
+                        numero: atletaObj.numeroAtleta,
+                        presente: presente,
+                        estadoRegisto: estado
+                    });
+                }
+            });
+
+            return {
+                escalao: escalaoAtual,
+                data: dataTreino,
+                horas: horaTreino,
+                local: localTreino,
+                quadras: quadrasExercicios,
+                observacoesGerais: observacoes,
+                atletas: registoAtletas,
+                registadoEm: new Date().toISOString()
+            };
+        }
+
+        function exportarTreinoJson() {
+            const dadosTreino = recolherDadosSessao();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dadosTreino, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Sessao_Treino_${escalaoAtual}_${dadosTreino.data}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function recuperarTreinoJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const sessaoCarregada = JSON.parse(e.target.result);
+                    if (sessaoCarregada.data) document.getElementById('dataTreino').value = sessaoCarregada.data;
+                    if (sessaoCarregada.horas) document.getElementById('horaTreino').value = sessaoCarregada.horas;
+                    if (sessaoCarregada.local) document.getElementById('localTreino').value = sessaoCarregada.local;
+                    if (sessaoCarregada.observacoesGerais) document.getElementById('observacoesTreino').value = sessaoCarregada.observacoesGerais;
+                    if (sessaoCarregada.quadras && Array.isArray(sessaoCarregada.quadras)) {
+                        quadrasExercicios = sessaoCarregada.quadras;
+                        renderizarQuadras();
+                    }
+                    alert('Sessão de treino recuperada com sucesso!');
+                } catch (err) {
+                    alert('Erro ao carregar o ficheiro JSON da sessão.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        async function exportarTreinoPdf() {
+            const dadosTreino = recolherDadosSessao();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(139, 92, 246);
+            doc.text("FUTSAL PRO - PLANO DE TREINO TÁTICO", 14, 18);
+
+            doc.setFontSize(10);
+            doc.setTextColor(60, 60, 60);
+            doc.text(`Escalão: ${dadosTreino.escalao} | Data: ${dadosTreino.data} às ${dadosTreino.horas}`, 14, 25);
+            doc.text(`Localização: ${dadosTreino.local || 'Não especificada'}`, 14, 31);
+
+            let yPos = 38;
+
+            for (let i = 0; i < dadosTreino.quadras.length; i++) {
+                const q = dadosTreino.quadras[i];
+                if (!q.descricao && q.marcadores.length === 0) continue;
+                
+                if (yPos > 190) { doc.addPage(); yPos = 20; }
+
+                doc.setFont("Helvetica", "bold");
+                doc.setTextColor(139, 92, 246);
+                doc.text(`Exercício #${i + 1} [Tipo: ${q.tipoTreino}] - ${q.descricao || 'Sem título'}`, 14, yPos);
+                yPos += 5;
+
+                const wrapper = document.getElementById(`wrapper_${i}`);
+                if (wrapper) {
+                    try {
+                        const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: null });
+                        const imgData = canvas.toDataURL('image/png');
+                        
+                        const imgWidth = 180;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        
+                        if (yPos + imgHeight > 265) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+
+                        doc.addImage(imgData, 'PNG', 14, yPos, imgWidth, imgHeight);
+                        yPos += imgHeight + 4;
+                    } catch (err) {
+                        console.error("Erro PDF:", err);
+                    }
+                }
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(40, 40, 40);
+                const textoExplicacao = `Explicação: ${q.explicacaoLivre || 'Sem descrição.'}`;
+                const linhasTexto = doc.splitTextToSize(textoExplicacao, 180);
+                doc.text(linhasTexto, 14, yPos);
+                yPos += (linhasTexto.length * 5) + 6;
+            }
+
+            if (yPos > 240) { doc.addPage(); yPos = 20; }
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(139, 92, 246);
+            doc.text("ATLETAS PRESENTES:", 14, yPos);
+            yPos += 2;
+
+            const colunas = ["Nº", "Nome do Atleta", "Presença", "Estado"];
+            const linhas = dadosTreino.atletas.map(a => [
+                a.numero || '-',
+                a.nome,
+                a.presente ? 'Sim' : 'Não',
+                a.estadoRegisto
+            ]);
+
+            doc.autoTable({
+                startY: yPos + 4,
+                head: [colunas],
+                body: linhas,
+                theme: 'grid',
+                headStyles: { fillColor: [139, 92, 246] },
+                styles: { fontSize: 8 }
+            });
+
+            doc.save(`Plano_Treino_${escalaoAtual}_${dadosTreino.data}.pdf`);
+        }
+    </script>
+</body>
+</html>

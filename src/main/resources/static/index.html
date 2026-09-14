@@ -327,6 +327,7 @@
                     <h3 id="tituloEscalaoAtual" style="margin: 0; color: var(--accent-color); font-size: 1rem;">Escalão</h3>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-secondary" onclick="irParaTreinos()" style="background-color: #8b5cf6; color: white;">⚽ Gestão de Treinos</button>
                     <button class="btn-secondary" onclick="abrirConvocatoria()" style="background-color: #0284c7; color: white;">📋 Gerir Convocatória</button>
                     <button class="btn-toggle-form" id="btnInserirAtletaTop" onclick="toggleFormulario()">+ Inserir Novo Atleta</button>
                     <button class="btn-secondary" onclick="alternarTema()" id="btnTemaDashboard">🌙 Modo Escuro</button>
@@ -632,6 +633,15 @@
             "Petizes", "Traquinas", "Benjamins", "Infantis", 
             "Iniciados", "Juvenis", "Juniores", "Seniores"
         ];
+
+        function irParaTreinos() {
+            if (!escalaoSelecionado) {
+                alert('Por favor, selecione um escalão primeiro.');
+                return;
+            }
+            localStorage.setItem('futsal_escalao_atual', escalaoSelecionado);
+            window.location.href = 'treinos.html';
+        }
 
         function mostrarLoading(mensagem) {
             document.getElementById('loadingText').innerText = mensagem;
