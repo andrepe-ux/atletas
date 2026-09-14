@@ -73,7 +73,6 @@
             display: flex; flex: 1; gap: 12px; padding: 12px; box-sizing: border-box; overflow: hidden;
         }
 
-        /* COLUNA LATERAL ESQUERDA AMPLIADA PARA CONFIG + ATLETAS */
         .left-config-panel {
             width: 320px; background: var(--bg-panel); border: 1px solid var(--border-color);
             border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
@@ -99,7 +98,6 @@
         }
         input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; }
 
-        /* GRID EM 4 QUADRAS ESPAÇOSAS */
         .quadras-grid-container {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 5px;
         }
@@ -135,7 +133,6 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;
         }
 
-        /* ÍCONES E ELEMENTOS TÁTICOS */
         .tactical-marker {
             position: absolute; display: flex; align-items: center; justify-content: center;
             font-weight: bold; cursor: grab; transform: translate(-50%, -50%);
@@ -214,7 +211,7 @@
                     <textarea id="observacoesTreino" rows="2" placeholder="Observações finais..."></textarea>
                 </div>
 
-                <!-- SEÇÃO DE ATLETAS NA LATERAL ESQUERDA -->
+                <!-- SEÇÃO DE ATLETAS -->
                 <div class="panel-header" style="margin-top: 6px;">
                     <h3>👥 Atletas (<span id="contadorAtletas">0</span>)</h3>
                     <input type="checkbox" id="selectAllPresenca" onclick="togglePresencaAll(this)" checked title="Selecionar Todos">
@@ -276,9 +273,9 @@
             localStorage.setItem('futsal_tema', novoTema);
         }
 
-		function voltarIndex() {
-		            window.history.back();
-		        }
+        function voltarIndex() {
+            window.history.back();
+        }
 
         function inicializarQuatroQuadras() {
             quadrasExercicios = [];
