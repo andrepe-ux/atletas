@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Futsal PRO - Gestão de Atletas</title>
+    <!-- Biblioteca jsPDF para geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --bg-body: #ffffff;
@@ -54,7 +56,7 @@
         }
         
         #app-scaler {
-            width: 100vw; height: 100vw;
+            width: 100vw; height: 100vh;
             max-width: 100vw; max-height: 100vh;
             display: flex; flex-direction: column; position: relative;
             background: var(--bg-scaler);
@@ -114,6 +116,36 @@
             background: var(--bg-panel); border: 1px solid var(--border-color);
             border-radius: 10px; width: 100%; max-width: 650px; max-height: 90vh;
             overflow-y: auto; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        /* MODAL FLUTUANTE PARA CONVOCATÓRIA */
+        .convocatoria-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px);
+            justify-content: center; align-items: center; z-index: 110; padding: 20px;
+        }
+        .convocatoria-modal.active { display: flex; }
+        .convocatoria-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 10px; width: 100%; max-width: 750px; max-height: 90vh;
+            overflow-y: auto; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        /* MODAL PARA AMPLIAR FOTO */
+        .foto-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 120;
+        }
+        .foto-modal.active { display: flex; }
+        .foto-modal-content {
+            background: var(--bg-panel); padding: 20px; border-radius: 10px;
+            text-align: center; max-width: 90vw; max-height: 90vh; border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center;
+        }
+        .foto-modal-content img {
+            max-width: 400px; max-height: 400px; width: 100%; height: auto;
+            border-radius: 8px; object-fit: cover; border: 2px solid var(--accent-color); margin-bottom: 15px;
         }
 
         .panel-header {
@@ -179,7 +211,8 @@
         tbody tr:nth-child(even) { background-color: var(--table-row-even); }
         tbody tr:hover { background-color: var(--table-row-hover); }
 
-        img.avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+        img.avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
+        img.avatar:hover { transform: scale(1.15); border-color: var(--accent-color); }
         
         .action-btns { display: flex; gap: 4px; }
         .btn-edit { background-color: #f59e0b; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
@@ -275,6 +308,7 @@
                     <h3 id="tituloEscalaoAtual" style="margin: 0; color: var(--accent-color); font-size: 1rem;">Escalão</h3>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-secondary" onclick="abrirConvocatoria()" style="background-color: #0284c7; color: white;">📋 Gerir Convocatória</button>
                     <button class="btn-toggle-form" id="btnInserirAtletaTop" onclick="toggleFormulario()">+ Inserir Novo Atleta</button>
                     <button class="btn-secondary" onclick="alternarTema()" id="btnTemaDashboard">🌙 Modo Escuro</button>
                 </div>
@@ -402,6 +436,73 @@
                             <button type="submit" id="btnSubmit" class="btn-action">Guardar Atleta</button>
                             <button type="button" id="btnCancel" class="btn-cancel" onclick="limparFormulario()">Fechar / Cancelar</button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- MODAL DE CONVOCATÓRIA -->
+                <div class="convocatoria-modal" id="convocatoriaModal">
+                    <div class="convocatoria-card">
+                        <div class="panel-header">
+                            <h3>Gestão de Convocatória de Jogo</h3>
+                            <button class="btn-secondary" onclick="fecharConvocatoria()" style="padding: 2px 8px;">✕</button>
+                        </div>
+                        <form id="convocatoriaForm" onsubmit="event.preventDefault(); gerarPdfConvocatoria();">
+                            <div class="form-row">
+                                <div>
+                                    <label for="adversario">Equipa Adversária:</label>
+                                    <input type="text" id="adversario" required placeholder="Ex: AD Sanjoanense">
+                                </div>
+                                <div>
+                                    <label for="dataJogo">Data do Jogo:</label>
+                                    <input type="date" id="dataJogo" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div>
+                                    <label for="horaJogo">Hora:</label>
+                                    <input type="time" id="horaJogo" required>
+                                </div>
+                                <div>
+                                    <label for="pavilhao">Pavilhão (Local / Morada):</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <input type="text" id="pavilhao" required placeholder="Ex: Pavilhão Municipal de S. João da Madeira" style="flex: 1;">
+                                        <button type="button" class="btn-secondary" onclick="procurarNoGoogleMaps()" title="Procurar local no Google Maps" style="background-color: #0d9488; color: white; white-space: nowrap;">🔍 Google Maps</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 5px;">Selecione os Jogadores para a Convocatória:</label>
+                                <div class="table-container" style="max-height: 250px; margin-top: 5px;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllConv" onclick="toggleSelectAll(this)"></th>
+                                                <th>Nº</th>
+                                                <th>Nome</th>
+                                                <th>Posição</th>
+                                                <th>Status</th>
+                                                <th>Cond. Física</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="listaAtletasConvocatoria">
+                                            <!-- Preenchido dinamicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-action" style="background-color: #0284c7; margin-top: 15px;">📄 Gerar e Descarregar PDF da Convocatória</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL PARA AMPLIAR FOTO DO ATLETA -->
+                <div class="foto-modal" id="fotoModal" onclick="fecharModalFoto()">
+                    <div class="foto-modal-content" onclick="event.stopPropagation()">
+                        <h3 id="modalNomeAtleta" style="margin-top: 0; color: var(--accent-color);">Foto do Atleta</h3>
+                        <img id="imgModalAmpliada" src="" alt="Foto Ampliada">
+                        <button class="btn-secondary" onclick="fecharModalFoto()">Fechar</button>
                     </div>
                 </div>
 
@@ -609,6 +710,164 @@
             panel.classList.toggle('active');
         }
 
+        // FUNÇÕES PARA AMPLIAR FOTO DO ATLETA
+        function ampliarFoto(urlFoto, nomeAtleta) {
+            if (!urlFoto) return;
+            document.getElementById('imgModalAmpliada').src = urlFoto;
+            document.getElementById('modalNomeAtleta').innerText = nomeAtleta;
+            document.getElementById('fotoModal').classList.add('active');
+        }
+
+        function fecharModalFoto() {
+            document.getElementById('fotoModal').classList.remove('active');
+        }
+
+        // MÓDULO DE CONVOCATÓRIA E PESQUISA NO GOOGLE MAPS
+        function abrirConvocatoria() {
+            const tbody = document.getElementById('listaAtletasConvocatoria');
+            tbody.innerHTML = '';
+
+            const atletasDoEscalao = atletasCache.filter(a => {
+                if (utilizadorLogado && utilizadorLogado.role === 'treinador' && (!a.escaloes || !a.escaloes.includes(escalaoSelecionado))) {
+                    return false;
+                }
+                return true;
+            });
+
+            if (atletasDoEscalao.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 15px;">Sem atletas disponíveis neste escalão.</td></tr>`;
+            } else {
+                atletasDoEscalao.forEach(a => {
+                    const disponivel = (a.status === 'Disponivel' || a.status === 'Disponível');
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="chk-convocado" value="${a.id}" ${disponivel ? '' : 'disabled'}>
+                        </td>
+                        <td>${a.numeroAtleta || ''}</td>
+                        <td style="font-weight: 600;">${a.nome || ''}</td>
+                        <td>${a.posicao || ''}</td>
+                        <td><span style="color: ${disponivel ? '#059669' : '#dc2626'};">${a.status || ''}</span></td>
+                        <td>${a.condicaoFisica ? a.condicaoFisica + '%' : '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('convocatoriaModal').classList.add('active');
+        }
+
+        function fecharConvocatoria() {
+            document.getElementById('convocatoriaModal').classList.remove('active');
+        }
+
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('.chk-convocado:not(:disabled)');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function procurarNoGoogleMaps() {
+            const query = document.getElementById('pavilhao').value.trim();
+            if (!query) {
+                alert('Por favor, introduza o nome ou morada do pavilhão primeiro.');
+                return;
+            }
+            const urlMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            window.open(urlMaps, '_blank');
+        }
+
+        function gerarPdfConvocatoria() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const adversario = document.getElementById('adversario').value;
+            const dataJogo = document.getElementById('dataJogo').value;
+            const horaJogo = document.getElementById('horaJogo').value;
+            const pavilhao = document.getElementById('pavilhao').value;
+
+            const checkboxes = document.querySelectorAll('.chk-convocado');
+            let convocados = [];
+            let naoConvocados = [];
+
+            checkboxes.forEach(cb => {
+                const atletaId = parseInt(cb.value);
+                const atleta = atletasCache.find(a => a.id === atletaId);
+                if (!atleta) return;
+
+                const disponivel = (atleta.status === 'Disponivel' || atleta.status === 'Disponível');
+
+                if (cb.checked && disponivel) {
+                    convocados.push(atleta);
+                } else {
+                    naoConvocados.push(atleta);
+                }
+            });
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(13, 148, 136);
+            doc.text("FUTSAL PRO - RELATÓRIO DE CONVOCATÓRIA", 14, 20);
+
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+            doc.text(`Escalão: ${escalaoSelecionado || 'Geral'}`, 14, 28);
+            doc.text(`Adversário: ${adversario}`, 14, 35);
+            doc.text(`Data: ${dataJogo} | Hora: ${horaJogo}`, 14, 42);
+            doc.text(`Pavilhão: ${pavilhao}`, 14, 49);
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pavilhao)}`;
+            doc.setTextColor(2, 132, 199);
+            doc.textWithLink("🔗 Abrir direções no Google Maps", 14, 56, { url: mapsUrl });
+
+            let yPos = 66;
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(13);
+            doc.setTextColor(5, 150, 105);
+            doc.text(`JOGADORES CONVOCADOS (${convocados.length})`, 14, yPos);
+            yPos += 8;
+
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(40, 40, 40);
+
+            if (convocados.length === 0) {
+                doc.text("Nenhum atleta convocado.", 14, yPos);
+                yPos += 8;
+            } else {
+                convocados.forEach((a, index) => {
+                    if (yPos > 280) { doc.addPage(); yPos = 20; }
+                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Cond. Física: ${a.condicaoFisica || '-'}%`, 18, yPos);
+                    yPos += 7;
+                });
+            }
+
+            yPos += 10;
+
+            if (yPos > 260) { doc.addPage(); yPos = 20; }
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(13);
+            doc.setTextColor(220, 38, 38);
+            doc.text(`JOGADORES NÃO CONVOCADOS / INDISPONÍVEIS (${naoConvocados.length})`, 14, yPos);
+            yPos += 8;
+
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(40, 40, 40);
+
+            if (naoConvocados.length === 0) {
+                doc.text("Nenhum atleta nesta categoria.", 14, yPos);
+            } else {
+                naoConvocados.forEach((a, index) => {
+                    if (yPos > 280) { doc.addPage(); yPos = 20; }
+                    doc.text(`${index + 1}. [Nº ${a.numeroAtleta || '-'}] ${a.nome} (${a.posicao}) - Status: ${a.status}`, 18, yPos);
+                    yPos += 7;
+                });
+            }
+
+            doc.save(`Convocatoria_${adversario.replace(/\s+/g, '_')}_${dataJogo}.pdf`);
+            fecharConvocatoria();
+        }
+
         // READ: Carregar Atletas diretamente do servidor Spring Boot (Estritamente Online)
         async function carregarAtletas() {
             mostrarLoading('A descarregar dados da base de dados...');
@@ -644,13 +903,17 @@
                 const tr = document.createElement('tr');
                 const statusColor = (a.status === 'Disponivel' || a.status === 'Disponível') ? '#059669' : '#dc2626';
                 
-                // LÓGICA DE ALERTA: Condição física < 60% E Nível de Cansaço Elevado ou Exausto
                 const condFisicaVal = parseFloat(a.condicaoFisica) || 100;
                 const cansaco = (a.nivelCansaco || '').toLowerCase();
                 const temAlerta = condFisicaVal < 60 && (cansaco === 'elevado' || cansaco === 'exausto');
 
+                // Atributo onclick para ampliar a foto se existir
+                const fotoHtml = a.fotoBase64 
+                    ? `<img src="${a.fotoBase64}" class="avatar" onclick="ampliarFoto('${a.fotoBase64}', '${a.nome}')" title="Clique para ampliar">` 
+                    : '<span style="color:var(--text-muted); font-size:0.8rem;">Sem foto</span>';
+
                 tr.innerHTML = `
-                    <td>${a.fotoBase64 ? `<img src="${a.fotoBase64}" class="avatar">` : '<span style="color:var(--text-muted); font-size:0.8rem;">Sem foto</span>'}</td>
+                    <td>${fotoHtml}</td>
                     <td><span style="color: #d97706; font-weight: bold;">${a.numeroAtleta || ''}</span></td>
                     <td style="font-weight: 600;">${a.nome || ''}</td>
                     <td>${a.posicao || ''}</td>

@@ -11,21 +11,19 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/atletas")
-@CrossOrigin(origins = "*") // Permite pedidos do frontend sem bloqueios de CORS
+@CrossOrigin(origins = "*")
 public class AtletaController {
 
     @Autowired
     private AtletaRepository atletaRepository;
 
-    // GET: Listar todos os atletas
     @GetMapping
     public List<Atleta> listarTodos() {
         return atletaRepository.findAll();
     }
 
-    // GET: Procurar atleta por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Atleta> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Atleta> buscarPorId(@PathVariable("id") Long id) {
         Optional<Atleta> atleta = atletaRepository.findById(id);
         if (atleta.isPresent()) {
             return ResponseEntity.ok(atleta.get());
@@ -33,22 +31,20 @@ public class AtletaController {
         return ResponseEntity.notFound().build();
     }
 
-    // POST: Criar novo atleta
     @PostMapping
     public Atleta criarAtleta(@RequestBody Atleta atleta) {
         return atletaRepository.save(atleta);
     }
 
-    // PUT: Atualizar atleta existente
     @PutMapping("/{id}")
-    public ResponseEntity<Atleta> atualizarAtleta(@PathVariable Long id, @RequestBody Atleta atletaDetalhes) {
+    public ResponseEntity<Atleta> atualizarAtleta(@PathVariable("id") Long id, @RequestBody Atleta atletaDetalhes) {
         Optional<Atleta> atletaOptional = atletaRepository.findById(id);
         
         if (atletaOptional.isPresent()) {
             Atleta atleta = atletaOptional.get();
             atleta.setNome(atletaDetalhes.getNome());
             atleta.setPosicao(atletaDetalhes.getPosicao());
-            atleta.setEscaloes(atletaDetalhes.getEscaloes()); // Atualiza os múltiplos escalões
+            atleta.setEscaloes(atletaDetalhes.getEscaloes());
             atleta.setNumeroAtleta(atletaDetalhes.getNumeroAtleta());
             atleta.setIdade(atletaDetalhes.getIdade());
             atleta.setAltura(atletaDetalhes.getAltura());
@@ -76,9 +72,8 @@ public class AtletaController {
         return ResponseEntity.notFound().build();
     }
 
-    // DELETE: Eliminar atleta
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarAtleta(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarAtleta(@PathVariable("id") Long id) {
         if (atletaRepository.existsById(id)) {
             atletaRepository.deleteById(id);
             return ResponseEntity.noContent().build();
